@@ -1,0 +1,3060 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>MoGo Sticker Tycoon: Posh Pets (v9.30 Pet Showroom Row)</title>
+<style>
+:root {
+  --brand-red:#EC1C24; --brand-blue:#0072BC; --brand-green:#00A651; --brand-yellow:#FFF200;
+  --brand-bg:#E0F7FA; --vault-orange:#F57C00; --vault-blue:#1976D2; --vault-yellow:#FBC02D;
+  --ink:#222;
+}
+*{box-sizing:border-box}
+body {
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: var(--brand-bg);
+  background-image: radial-gradient(#B2EBF2 15%, transparent 16%), radial-gradient(#B2EBF2 15%, transparent 16%);
+  background-size: 60px 60px;
+  margin:0; padding:0 0 120px 0; color:#222;
+  overflow-x:hidden;
+}
+h1{margin:0; color:var(--brand-red); font-size:2.35rem; letter-spacing:1px; -webkit-text-stroke: 1px #000; display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap;}
+h2,h3{margin:0 0 10px 0}
+small{opacity:.85}
+a{color:var(--brand-blue)}
+
+/* Header Pet Slot (multi) */
+#header-pet-slot{display:flex; align-items:center; justify-content:flex-end; gap:6px; cursor:pointer;}
+#header-pet-slot .header-pet-empty{font-size:42px; line-height:1; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.3));}
+#header-pet-slot .header-pet{display:flex; align-items:center; justify-content:center; border-radius:999px; transition:transform .12s; user-select:none;}
+#header-pet-slot .header-pet:hover{transform:scale(1.08);}
+#header-pet-slot .header-pet img{width:48px; height:48px; object-fit:contain; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.3));}
+#header-pet-slot .header-pet span{font-size:42px; line-height:1; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.3));}
+
+.pet-card.pet-equipped{outline:3px solid var(--brand-green); box-shadow:0 10px 18px rgba(0,0,0,.12);}
+.pet-card .badge{background:var(--brand-green); color:#fff; border:2px solid #000; border-radius:999px; padding:2px 8px; font-size:11px; font-weight:900;}
+.header-pet-row{display:flex; align-items:center; gap:6px;}
+
+.pill {
+  display:inline-flex; align-items:center; gap:8px;
+  border:2px solid #000; border-radius:999px; padding:6px 10px; background:rgba(255,255,255,.1);
+}
+.pill strong{font-variant-numeric: tabular-nums}
+.pill.click{cursor:pointer; user-select:none}
+.pill.click:hover{transform: translateY(-1px)}
+.main-header {
+  background:#fff; border-bottom:6px solid #333; padding:18px 14px; text-align:center;
+  box-shadow:0 10px 22px rgba(0,0,0,.10); margin-bottom:14px;
+}
+.nav-bar {
+  display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin:0 0 16px 0; padding:0 12px;
+}
+.btn {
+  padding:10px 14px; border:3px solid #333; border-radius:14px; cursor:pointer;
+  font-weight:900; text-transform:uppercase; background:#fff; border-bottom-width:6px;
+  transition: transform .08s, box-shadow .08s;
+  font-size:.82rem; position:relative; user-select:none;
+}
+.btn:active{transform: translateY(3px); border-bottom-width:3px}
+.btn.active{background:#333; color:#fff; border-color:#000}
+.btn-green{background:var(--brand-green); color:#fff; border-color:#006837}
+.btn-blue{background:var(--brand-blue); color:#fff; border-color:#004c8c}
+.btn-orange{background:var(--brand-yellow); color:#222; border-color:#ccac00}
+.btn-red{background:#ffe7ea; color:#c00; border-color:#c00}
+.btn-outline{background:#fff; color:#222}
+.btn-small{padding:8px 10px; font-size:.8rem}
+.nav-bubble {
+  position:absolute; top:-10px; right:-10px; background:var(--brand-red); color:#fff;
+  border-radius:50%; width:24px; height:24px; display:none; align-items:center; justify-content:center;
+  font-size:12px; border:2px solid #fff; box-shadow:0 2px 4px rgba(0,0,0,.3);
+}
+.panel{display:none; padding:16px; max-width:1600px; margin:0 auto}
+.panel.active{display:block}
+.card {
+  background:#fff; border:3px solid #333; border-radius:16px; padding:16px; margin-bottom:14px;
+  box-shadow:5px 5px 0 rgba(0,0,0,.06);
+}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.row > *{flex:1; min-width:180px}
+input, select, textarea {
+  padding:10px; border:2px solid #ccc; border-radius:12px; width:100%; font:inherit;
+}
+textarea{min-height:140px; resize:vertical}
+.badge {
+  display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px;
+  font-weight:900; border:2px solid #333; background:#fff; font-size:.78rem;
+}
+.badge.ok{background:#e8ffe8}
+.badge.warn{background:#fff0d6}
+.badge.danger{background:#ffe7ea}
+.grid {
+  display:grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap:10px;
+}
+.set-card{background:#fff; border:3px solid #333; border-radius:16px; margin-bottom:18px; overflow:hidden}
+.set-header{background:#333; color:#fff; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; font-weight:900}
+.sticker {
+  aspect-ratio:3/4; border:2px solid #ccc; border-radius:12px; position:relative;
+  background:#e0e0e0; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding:6px; transition:.15s; user-select:none; opacity:.62; filter: grayscale(1);
+}
+.sticker:hover{transform: translateY(-3px); opacity:1; filter:none}
+.sticker.owned{border-width:3px; box-shadow:0 5px 0 rgba(0,0,0,.15); background:#fff; opacity:1; filter:none}
+.sticker.gold{border-color:#B8860B; background:#cfb53b}
+.sticker.gold.owned{background: linear-gradient(135deg,#FFD700 0%,#FDB931 50%,#FFD700 100%); border-color:#B8860B}
+.count-badge {
+  position:absolute; top:-8px; right:-8px; background:var(--brand-red); color:#fff;
+  border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center;
+  font-size:10px; font-weight:900; border:2px solid #fff; z-index:5; box-shadow:0 2px 2px rgba(0,0,0,.3);
+}
+.action-row {
+  position:absolute; bottom:-10px; width:100%; display:flex; justify-content:center; gap:6px;
+  opacity:0; transition:.15s;
+}
+.sticker:hover .action-row{opacity:1; bottom:-12px}
+.icon-btn {
+  width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-weight:900; border:2px solid #fff; cursor:pointer; color:#fff; font-size:14px;
+  box-shadow:0 2px 4px rgba(0,0,0,.3); transition: transform .08s;
+}
+.icon-btn:hover{transform:scale(1.08)}
+.btn-plus{background:var(--brand-blue)}
+.btn-minus{background:var(--brand-red)}
+.btn-arrow{background:var(--brand-green)}
+.mini{font-size:.88rem; opacity:.85}
+.hr{height:1px; background:rgba(0,0,0,.12); margin:12px 0}
+.toast-wrap{position:fixed; bottom:16px; right:16px; z-index:9999; display:flex; flex-direction:column; gap:10px}
+.toast{background:#fff; border-left:6px solid var(--brand-green); padding:12px 14px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,.2); font-weight:800; min-width:260px; display:flex; justify-content:space-between; gap:10px; align-items:flex-start}
+.toast.error{border-color:var(--brand-red)}
+.toast.info{border-color:var(--brand-blue)}
+.toast .x{cursor:pointer; font-weight:900; opacity:.7}
+.modal{display:none; position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:2000; padding:18px}
+.modal.show{display:block}
+.modal-box{background:#fff; width:min(760px, calc(100vw - 36px)); margin:42px auto; padding:18px; border-radius:18px; border:4px solid #333; max-height:82vh; overflow:auto}
+.table{width:100%; border-collapse:collapse; font-size:.92rem}
+.table th,.table td{border-bottom:1px solid rgba(0,0,0,.10); padding:8px 6px; text-align:left; vertical-align:top}
+.table th{font-weight:900}
+.kpi{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.kpi .box{background:#fff; border:3px solid #333; border-radius:16px; padding:10px 12px; font-weight:900}
+.drop-zone{transition:.15s}
+.drop-zone.drag-over{background: rgba(0,166,81,.10); border-color: var(--brand-green); transform: scale(1.01)}
+
+/* v9 upgrades */
+.sticker.dupe { outline: 4px solid rgba(0,166,81,.55); }
+.sticker.missing { outline: 4px solid rgba(236,28,36,.35); }
+body.compact .grid { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap:8px; }
+body.compact .sticker { border-radius:10px; }
+.chart-wrap{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start}
+canvas.chart{background:#fafafa;border:2px dashed rgba(0,0,0,.2);border-radius:14px}
+
+
+/* Pet Showroom & Equipped Layout */
+.pet-shelves{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;}
+.pet-card{border:3px solid #222;border-radius:18px;padding:12px;background:#fff;box-shadow:0 10px 0 rgba(0,0,0,.08);position:relative; transition:transform .1s;}
+.pet-card:hover{transform:translateY(-2px);}
+
+.pet-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.pet-plot{margin-top:10px;border-radius:16px;border:3px dashed rgba(0,0,0,.25);height:120px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(173,216,230,.35), rgba(255,255,255,0));}
+.pet-sprite{width:80px;height:80px;display:flex;align-items:center;justify-content:center;font-size:60px;transform-origin:center;}
+.pet-sprite img{width:80px;height:80px;object-fit:contain;}
+
+.pet-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.pet-actions .btn{flex:1;}
+
+@keyframes petHop{0%,100%{transform:translateY(0)}40%{transform:translateY(-14px)}60%{transform:translateY(0)}}
+@keyframes petBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes petWiggle{0%,100%{transform:rotate(0deg)}25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+@keyframes petSpin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+@keyframes petFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.pet-anim-hop{animation:petHop .7s infinite}
+.pet-anim-bounce{animation:petBounce 1.1s infinite}
+.pet-anim-wiggle{animation:petWiggle .6s infinite}
+.pet-anim-spin{animation:petSpin 1.6s linear infinite}
+.pet-anim-float{animation:petFloat 1.4s infinite}
+
+.grid2 { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:16px; }
+
+</style>
+</head>
+<body>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<div class="top-banner">
+  <span class="pill click" id="pill-season" title="Click to edit season end">⏳ Season: <strong id="season-label">...</strong></span>
+  <span class="pill" id="pill-reset">🔄 Reset in: <strong id="reset-label">...</strong></span>
+  <span class="pill" id="pill-sends">📤 Sends: <strong id="sends-label">...</strong></span>
+  <span class="pill" id="pill-blitz" style="display:none">⚡ GOLD BLITZ ACTIVE</span>
+  <span class="pill" id="pill-fest" style="display:none">🎉 TRADE FEST ACTIVE</span>
+  <span id="header-pet-slot" title="Pets (Click to manage)" style="margin-left:auto;"><span class="header-pet-empty">🐾</span></span>
+</div>
+
+<div class="main-header">
+  <h1>
+    🎩 MoGo Sticker Tycoon: Posh Pets
+</h1>
+  
+  <div style="max-width:720px; margin:10px auto 0 auto;">
+    <div class="row" style="justify-content:center;">
+      <div style="min-width:260px; flex:0 1 360px;">
+        <label style="font-weight:900;">Active Tycoon</label>
+        <select id="active-account"></select>
+        <div class="mini" id="acc-meta"></div>
+      </div>
+      <div style="min-width:260px; flex:0 1 360px;">
+        <label style="font-weight:900;">Quick filters</label>
+        <div class="row" style="gap:8px;">
+          <select id="set-filter" style="flex:1"></select>
+          <label class="badge" style="cursor:pointer; user-select:none; gap:8px; flex:0 0 auto; min-width:auto;">
+            <input type="checkbox" id="prestige-toggle" style="width:auto; margin:0"/>
+            Prestige Mode
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="nav-bar">
+  <button class="btn active" data-nav="album">📖 Album</button>
+  <button class="btn btn-green" data-nav="progress">📊 Progress</button>
+  <button class="btn btn-blue" data-nav="plan">📝 Trade Plan</button>
+  <button class="btn" data-nav="compare">🆚 Compare</button>
+  <button class="btn btn-orange" data-nav="vault">🎁 Vault <div id="vault-bubble" class="nav-bubble">!</div></button>
+  <button class="btn" data-nav="smart">🤖 Smart</button>
+  <button class="btn" data-nav="showcase">📸 Showcase</button>
+  <button class="btn" data-nav="trends">📈 Trends</button>
+  <button class="btn" data-nav="import">📥 Import</button>
+  <button class="btn" data-nav="pet">🐾 Pet</button>
+  <button class="btn" data-nav="admin">🔒 Admin</button>
+</div>
+
+<section id="panel-album" class="panel active">
+  <div class="card">
+    <div class="row">
+      <button class="btn btn-outline" id="btn-clear-active">🗑️ Clear Active Album</button>
+      <button class="btn btn-outline" id="btn-export-active">⬇️ Export Active CSV</button>
+      <button class="btn btn-outline" id="btn-export-all">⬇️ Export All Accounts JSON</button>
+      <button class="btn btn-outline" id="btn-open-search">🔎 Search</button>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="row">
+      <div style="min-width:240px;">
+        <label class="mini">Album view</label>
+        <select id="album-view-mode">
+          <option value="all">All stickers</option>
+          <option value="missing">Missing only</option>
+          <option value="owned">Owned only</option>
+          <option value="dupes">Dupes only</option>
+          <option value="gold">Gold only</option>
+          <option value="blitz">Blitz-eligible only</option>
+        </select>
+      </div>
+      <div style="min-width:240px;">
+        <label class="mini">Quick search</label>
+        <input id="album-q" placeholder="Type a sticker name..."/>
+      </div>
+      <div style="flex:0 0 auto; min-width:auto;">
+        <label class="mini">Set sort</label>
+        <select id="album-sort">
+          <option value="set">Set order</option>
+          <option value="missing-desc">Most missing</option>
+          <option value="missing-asc">Least missing</option>
+          <option value="stars-desc">Highest avg stars</option>
+        </select>
+      </div>
+      <div style="flex:0 0 auto; min-width:auto;">
+        <label class="mini">Compact</label>
+        <label class="badge" style="cursor:pointer; user-select:none; gap:8px;">
+          <input type="checkbox" id="album-compact" style="width:auto; margin:0"/>
+          Smaller tiles
+        </label>
+      </div>
+    </div>
+
+    <div class="mini">Tip: Click a sticker to toggle owned (0/1). Use + and - to adjust counts. Arrow adds to a plan.</div>
+</div>
+  <div id="album-container"></div>
+</section>
+
+<section id="panel-progress" class="panel">
+  <div class="card">
+    <div class="kpi" id="progress-kpis"></div>
+    <div class="hr"></div>
+    <div id="progress-sets"></div>
+  </div>
+</section>
+
+<section id="panel-plan" class="panel">
+  <div class="card">
+    <div class="row">
+      <button class="btn btn-green" id="btn-new-plan">+ New Plan Group</button>
+      <button class="btn btn-outline" id="btn-clear-plans">Clear all plans</button>
+      <button class="btn btn-outline" id="btn-export-plans">Export plans JSON</button>
+    </div>
+    <div class="mini">Plans are your staging board. Trades still happen inside the game.</div>
+  </div>
+  <div id="plans-list"></div>
+</section>
+
+<section id="panel-compare" class="panel">
+  <div class="card">
+    <h3>🆚 Side-by-side Compare (Drag and Drop)</h3>
+    <div class="row">
+      <div>
+        <label style="font-weight:900;">Left</label>
+        <select id="comp-left"></select>
+      </div>
+      <div>
+        <label style="font-weight:900;">Right</label>
+        <select id="comp-right"></select>
+      </div>
+      <div style="flex:0 0 auto; min-width:auto;">
+        <button class="btn btn-outline" id="btn-make-plan-from-compare">Create plan from current view</button>
+      </div>
+    </div>
+    <div class="mini">Drag a sticker card from a dupe list into the other side to add it to a plan slot.</div>
+  </div>
+  <div style="display:flex; gap:14px; flex-wrap:wrap;">
+    <div id="comp-view-left" class="card drop-zone" style="flex:1; min-width:320px;"></div>
+    <div id="comp-view-right" class="card drop-zone" style="flex:1; min-width:320px;"></div>
+  </div>
+</section>
+
+<section id="panel-vault" class="panel">
+  <div class="card" style="text-align:center;">
+    <h2 style="color:var(--vault-orange);">🌟 Vault</h2>
+    <div style="font-size:2.4rem; font-weight:900; color:#FFD700; text-shadow:1px 1px 0 #000;">
+      <span id="vault-stars">0</span> Stars
+    </div>
+    <div class="row" style="justify-content:center; margin-top:10px;">
+      <button class="btn btn-outline" data-vault="250">Open 250</button>
+      <button class="btn btn-outline" data-vault="450">Open 450</button>
+      <button class="btn btn-outline" data-vault="700">Open 700</button>
+    </div>
+    <div class="hr"></div>
+    <h3>🏆 Album Completion</h3>
+    <div class="mini" id="album-complete-hint"></div>
+    <div class="row" style="justify-content:center; margin-top:10px;">
+      <button class="btn btn-green" id="btn-complete-album">Complete album and start prestige</button>
+      <button class="btn btn-outline" id="btn-undo-complete">Undo completion</button>
+    </div>
+  </div>
+  <div class="card">
+    <h3>📜 History</h3>
+    <div id="history-list" class="mini"></div>
+  </div>
+</section>
+
+<section id="panel-smart" class="panel">
+  <div class="card">
+    <div class="row">
+      <div>
+        <label style="font-weight:900;">Strategy</label>
+        <select id="smart-strategy">
+          <option value="closers">Close Sets (missing 1)</option>
+          <option value="high">High stars (4-5)</option>
+          <option value="low">Low stars (1-3)</option>
+          <option value="blitz">Gold Blitz eligible</option>
+          <option value="set">Same set swaps</option>
+          <option value="optimizer">Send budget optimizer</option>
+          <option value="multi">Multi-account closers</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-weight:900;">Max suggestions</label>
+        <input type="number" id="smart-max" value="30" min="5" step="5"/>
+      </div>
+      <div style="flex:0 0 auto; min-width:auto;">
+        <button class="btn btn-blue" id="btn-run-smart">Run</button>
+      </div>
+    </div>
+    <div class="mini">Gold Blitz suggestions only appear when Blitz is active and the gold card is enabled in Admin.</div>
+  </div>
+  <div id="smart-list"></div>
+</section>
+
+<section id="panel-showcase" class="panel">
+  <div class="card">
+    <h3>📸 Showcase Card</h3>
+    <div class="row">
+      <button class="btn btn-green" id="btn-showcase-auto">Auto fill (best)</button>
+      <button class="btn btn-outline" id="btn-showcase-manual">Clear and manual</button>
+      <button class="btn btn-outline" id="btn-showcase-copy">Copy text summary</button>
+    </div>
+    <div class="row" style="margin-top:10px;">
+      <div>
+        <label style="font-weight:900;">Account</label>
+        <select id="showcase-account"></select>
+      </div>
+      <div style="flex:0 0 auto; min-width:auto;">
+        <span class="badge" id="showcase-pill">Mode: Auto</span>
+      </div>
+    </div>
+  </div>
+  <div class="card" id="showcase-card">
+    <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; border-bottom:4px solid #333; padding-bottom:10px; margin-bottom:12px;">
+      <div>
+        <h2 style="color:var(--brand-red); margin:0;">POSH PETS</h2>
+        <div class="mini" id="showcase-user"></div>
+        <div class="mini" id="showcase-linkline" style="margin-top:6px;"></div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-weight:900;">TRADING CARD</div>
+        <small id="showcase-date"></small>
+        <div id="showcase-qr-wrap" style="margin-top:8px; display:none; justify-content:flex-end;">
+          <img id="showcase-qr" alt="QR" style="width:120px; height:120px; border:3px solid #333; border-radius:12px; background:#fff;"/>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; gap:14px; flex-wrap:wrap;">
+      <div style="flex:1; min-width:280px; background:#f4f4f4; padding:10px; border-radius:14px;">
+        <div style="font-weight:900; text-align:center; margin-bottom:8px;">📤 I HAVE (Duplicates)</div>
+        <div id="showcase-have-controls" style="display:none;">
+          <div class="row" style="gap:8px;">
+            <select id="showcase-add-have"></select>
+            <button class="btn btn-green btn-small" id="btn-showcase-add-have">Add</button>
+          </div>
+        </div>
+        <div id="showcase-haves" class="mini"></div>
+      </div>
+      <div style="flex:1; min-width:280px; background:#f4f4f4; padding:10px; border-radius:14px;">
+        <div style="font-weight:900; text-align:center; margin-bottom:8px;">📥 I NEED</div>
+        <div id="showcase-need-controls" style="display:none;">
+          <div class="row" style="gap:8px;">
+            <select id="showcase-add-need"></select>
+            <button class="btn btn-green btn-small" id="btn-showcase-add-need">Add</button>
+          </div>
+        </div>
+        <div id="showcase-needs" class="mini"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="panel-trends" class="panel">
+  <div class="card">
+    <h3>📈 Trends</h3>
+    <div class="row">
+      <button class="btn btn-blue" id="btn-snapshot">Take snapshot</button>
+      <button class="btn btn-outline" id="btn-clear-snapshots">Clear snapshots</button>
+      <button class="btn btn-outline" id="btn-export-snapshots">Export snapshots JSON</button>
+    </div>
+    <div class="mini">Snapshots are stored locally on your device.</div>
+  </div>
+  <div class="card">
+    <div class="chart-wrap"><canvas class="chart" id="chart-completion" width="560" height="260"></canvas><canvas class="chart" id="chart-stars" width="560" height="260"></canvas></div><div class="hr"></div><div id="trends-content"></div>
+  </div>
+</section>
+
+<section id="panel-import" class="panel">
+  <div class="card">
+    <h3>📥 Import</h3>
+    <div class="mini">Fast import for the active account. Paste CSV or TSV with columns: Sticker Name, Count. You can also include Set# as first column.</div>
+    <div class="row">
+      <textarea id="import-text" placeholder="Example:&#10;Kiara,1&#10;Roo,2"></textarea>
+      <div style="min-width:260px; flex:0 1 320px;">
+        <label style="font-weight:900;">Options</label>
+        <label class="badge" style="cursor:pointer; user-select:none; gap:8px;">
+          <input type="checkbox" id="import-merge" checked style="width:auto; margin:0"/>
+          Merge into existing counts
+        </label>
+        <label class="badge" style="cursor:pointer; user-select:none; gap:8px;">
+          <input type="checkbox" id="import-ignore-unknown" checked style="width:auto; margin:0"/>
+          Ignore unknown names
+        </label>
+        <button class="btn btn-green" id="btn-import-apply">Apply import</button>
+        <button class="btn btn-outline" id="btn-import-clear">Clear box</button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>⬇️ Export helpers</h3>
+    <div class="row">
+      <button class="btn btn-outline" id="btn-export-album-csv">Export album master CSV</button>
+      <button class="btn btn-outline" id="btn-export-active-json">Export active account JSON</button>
+    </div>
+  </div>
+</section>
+
+
+<section id="panel-pet" class="panel">
+  <div class="card">
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+      <h2 style="margin:0;">🐾 Pet Showroom</h2>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <button class="btn" id="btn-pet-add">➕ Add / Upload Pet</button>
+        <button class="btn" id="btn-pet-reset">♻️ Reset to defaults</button>
+      </div>
+    </div>
+    <div class="mini" style="margin-top:6px;">Hover to animate & hear sound. Click 'Equip' to move the pet to the <strong>Top Header</strong>.</div>
+    <div class="hr"></div>
+    <div id="pet-showroom-area" class="pet-shelves"></div>
+  </div>
+</section>
+
+<section id="panel-admin" class="panel">
+  <div class="card">
+    <h3>🔒 Admin</h3>
+    <div class="row">
+      <button class="btn btn-green" id="btn-add-account">+ Add account</button>
+      <button class="btn btn-outline" id="btn-reset-app">Factory reset</button>
+      <button class="btn btn-outline" id="btn-reset-window">Start new send window now</button>
+    </div>
+    <div class="hr"></div>
+    <div class="row">
+      <div>
+        <label style="font-weight:900;">Gold Blitz</label>
+        <label class="badge" style="cursor:pointer; user-select:none; gap:8px;">
+          <input type="checkbox" id="blitz-active" style="width:auto; margin:0"/>
+          Blitz active
+        </label>
+        <div class="mini">Choose which gold cards are tradable during blitz.</div>
+        <select id="blitz-cards" multiple size="10"></select>
+      </div>
+      <div>
+        <label style="font-weight:900;">Trade Fest</label>
+        <label class="badge" style="cursor:pointer; user-select:none; gap:8px;">
+          <input type="checkbox" id="fest-active" style="width:auto; margin:0"/>
+          Fest active (10 sends)
+        </label>
+        <div class="mini">Normal regular cap: <strong id="cap-normal-label">5</strong>. Fest cap: <strong id="cap-fest-label">10</strong>. Blitz cap: <strong id="cap-blitz-label">5</strong>.</div>
+        <div class="row">
+          <div><label class="mini">Normal cap</label><input type="number" id="cap-normal" min="1" value="5"/></div>
+          <div><label class="mini">Fest cap</label><input type="number" id="cap-fest" min="1" value="10"/></div>
+          <div><label class="mini">Blitz cap</label><input type="number" id="cap-blitz" min="1" value="5"/></div>
+        </div>
+        <label style="font-weight:900; margin-top:8px; display:block;">Optimizer mode</label>
+        <select id="opt-budget">
+          <option value="auto">Auto</option>
+          <option value="force5">Force 5</option>
+          <option value="force10">Force 10</option>
+        </select>
+        <label style="font-weight:900; margin-top:10px; display:block;">Vault safety</label>
+        <label class="badge" style="cursor:pointer; user-select:none; gap:8px;">
+          <input type="checkbox" id="vault-protect-gold" style="width:auto; margin:0"/>
+          Protect gold dupes from vault burn
+        </label>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Accounts</h3>
+    <div id="admin-accounts"></div>
+  </div>
+</section>
+
+<div class="modal" id="modal-season">
+  <div class="modal-box">
+    <h3>⏳ Season end time</h3>
+    <div class="mini">Set the season end date and time for the header countdown.</div>
+    <div class="row">
+      <div style="min-width:260px;">
+        <label class="mini">End date and time</label>
+        <input type="datetime-local" id="season-end"/>
+      </div>
+      <div style="flex:0 0 auto; min-width:auto;">
+        <button class="btn btn-blue" id="btn-save-season">Save</button>
+      </div>
+    </div>
+    <div class="hr"></div>
+    <div class="row">
+      <button class="btn btn-outline" id="btn-close-season">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal-account">
+  <div class="modal-box">
+    <h3 id="acc-modal-title">Account</h3>
+    <input type="hidden" id="acc-id"/>
+    <label class="mini">Name</label>
+    <input id="acc-name" placeholder="Name"/>
+    <label class="mini">MoGo Code</label>
+    <input id="acc-code" placeholder="Code"/>
+    <label class="mini">Invite link</label>
+    <input id="acc-link" placeholder="https://..."/>
+    <div class="hr"></div>
+    <div class="row">
+      <button class="btn btn-green" id="btn-save-account">Save</button>
+      <button class="btn btn-outline" id="btn-close-account">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal-picker">
+  <div class="modal-box">
+    <h3 id="picker-title">Pick sticker</h3>
+    <input id="picker-search" placeholder="Search"/>
+    <label class="badge" style="cursor:pointer; user-select:none; gap:8px;">
+      <input type="checkbox" id="picker-only-missing" style="width:auto; margin:0"/>
+      Only show receiver missing
+    </label>
+    <div class="mini" id="picker-meta"></div>
+    <div class="hr"></div>
+    <div id="picker-list" class="grid"></div>
+    <div class="hr"></div>
+    <button class="btn btn-outline" id="btn-close-picker">Close</button>
+  </div>
+</div>
+
+<div class="modal" id="modal-search">
+  <div class="modal-box">
+    <h3>🔎 Search stickers</h3>
+    <div class="row">
+      <input id="search-q" placeholder="Search by name..."/>
+      <select id="search-scope" style="min-width:220px; flex:0 0 220px;">
+        <option value="active">Active account</option>
+        <option value="all">All accounts</option>
+      </select>
+      <button class="btn btn-blue" id="btn-search-run" style="flex:0 0 auto; min-width:auto;">Search</button>
+    </div>
+    <div class="hr"></div>
+    <div class="mini" id="search-meta"></div>
+    <div id="search-results" class="grid" style="margin-top:10px;"></div>
+    <div class="hr"></div>
+    <button class="btn btn-outline" id="btn-close-search">Close</button>
+  </div>
+</div>
+
+<div class="modal" id="modal-pet" style="display:none;">
+  <div class="modal-box" style="max-width:720px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+      <h2 style="margin:0;">➕ Add / Upload Pet</h2>
+      <button class="btn" id="btn-close-pet">✖</button>
+    </div>
+    <div class="mini" style="margin-top:6px;">Create a new pet for your showroom. You can use an emoji or upload an image. Images are resized automatically for the showroom.</div>
+    <div class="hr"></div>
+
+    <div class="grid2" style="gap:12px;">
+      <div>
+        <label class="mini">Pet name</label>
+        <input id="pet-new-name" placeholder="Froggo, Pupster, etc." />
+        <label class="mini">Use emoji (optional)</label>
+        <input id="pet-new-emoji" placeholder="🐸" />
+        <label class="mini">Or image (upload file)</label>
+        <input id="pet-new-file" type="file" accept="image/*" />
+        <label class="mini">Or image URL</label>
+        <input id="pet-new-url" placeholder="https://...png" />
+      </div>
+      <div>
+        <label class="mini">Animation</label>
+        <select id="pet-new-anim">
+          <option value="none">None</option>
+          <option value="hop">Hop</option>
+          <option value="bounce">Bounce</option>
+          <option value="wiggle">Wiggle</option>
+          <option value="spin">Spin</option>
+          <option value="float">Float</option>
+        </select>
+        <label class="mini">Sound URL (optional)</label>
+        <input id="pet-new-sound" placeholder="https://...mp3" />
+        <label class="mini">Trigger</label>
+        <select id="pet-new-trigger">
+          <option value="hover">On hover</option>
+          <option value="always">Continuous</option>
+          <option value="timer">On timer</option>
+        </select>
+        <div id="pet-trigger-interval-row" style="display:none; margin-top:8px;">
+          <label class="mini">Timer interval (seconds)</label>
+          <input id="pet-new-interval" type="number" min="2" max="3600" value="12" />
+        </div>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+    <div style="display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap;">
+      <button class="btn btn-green" id="btn-pet-save">Save Pet</button>
+      <button class="btn" id="btn-pet-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  // --------- Album master ----------
+  const RAW_DB = [[1, "Community Gallery", "Kiara", 1, "N"], [1, "Community Gallery", "Roo", 1, "N"], [1, "Community Gallery", "Smokey", 1, "N"], [1, "Community Gallery", "Bryan", 1, "N"], [1, "Community Gallery", "Stella", 1, "N"], [1, "Community Gallery", "Posh Paws", 1, "N"], [1, "Community Gallery", "Furry Friend", 1, "N"], [1, "Community Gallery", "Park Play", 1, "N"], [1, "Community Gallery", "Gallery Gift", 1, "N"], [2, "Pet Pampering", "Bubble Bath", 1, "N"], [2, "Pet Pampering", "Fluffy Towel", 1, "N"], [2, "Pet Pampering", "Grooming Kit", 1, "N"], [2, "Pet Pampering", "Scrub-a-dub", 1, "N"], [2, "Pet Pampering", "Shiny Coat", 1, "N"], [2, "Pet Pampering", "Squeaky Toy", 1, "N"], [2, "Pet Pampering", "Paw-some Day", 1, "N"], [2, "Pet Pampering", "Bow Tie", 2, "N"], [2, "Pet Pampering", "Best in Show", 2, "N"], [3, "Backyard BBQ", "Grill Master", 1, "N"], [3, "Backyard BBQ", "Burger Flip", 1, "N"], [3, "Backyard BBQ", "Hot Dog", 1, "N"], [3, "Backyard BBQ", "Picnic Blanket", 1, "N"], [3, "Backyard BBQ", "Ketchup Bottle", 1, "N"], [3, "Backyard BBQ", "Mustard Dab", 1, "N"], [3, "Backyard BBQ", "Corn Cob", 2, "N"], [3, "Backyard BBQ", "Charcoal Bag", 2, "N"], [3, "Backyard BBQ", "Spatula Spin", 2, "N"], [4, "Morning Walk", "Sun Rise", 1, "N"], [4, "Morning Walk", "Coffee Cup", 1, "N"], [4, "Morning Walk", "Early Bird", 1, "N"], [4, "Morning Walk", "Dew Drop", 2, "N"], [4, "Morning Walk", "Fresh Air", 2, "N"], [4, "Morning Walk", "Park Path", 2, "N"], [4, "Morning Walk", "Leash Link", 2, "N"], [4, "Morning Walk", "Hydrant Hug", 2, "N"], [4, "Morning Walk", "Daily Jog", 3, "N"], [5, "Kitty Nap", "Soft Pillow", 1, "N"], [5, "Kitty Nap", "Warm Sunbeam", 1, "N"], [5, "Kitty Nap", "Dreamy Eyes", 2, "N"], [5, "Kitty Nap", "Tail Twitch", 2, "N"], [5, "Kitty Nap", "Purr-fect Sleep", 2, "N"], [5, "Kitty Nap", "Catnip Toy", 2, "N"], [5, "Kitty Nap", "Yarn Ball", 3, "N"], [5, "Kitty Nap", "Midnight Snack", 3, "N"], [5, "Kitty Nap", "Snuggle Session", 3, "N"], [6, "Doggy Daycare", "Play Pen", 2, "N"], [6, "Doggy Daycare", "Puppy Eyes", 2, "N"], [6, "Doggy Daycare", "Nap Time", 2, "N"], [6, "Doggy Daycare", "Feeding Bowl", 2, "N"], [6, "Doggy Daycare", "Chew Bone", 2, "N"], [6, "Doggy Daycare", "Bark Park", 3, "N"], [6, "Doggy Daycare", "Furry Friends", 3, "N"], [6, "Doggy Daycare", "Golden Retriever", 3, "Y"], [6, "Doggy Daycare", "Daycare Diploma", 3, "Y"], [7, "Aquatic Pals", "Fish Bowl", 2, "N"], [7, "Aquatic Pals", "Bubbles", 2, "N"], [7, "Aquatic Pals", "Coral Reef", 2, "N"], [7, "Aquatic Pals", "Sea Shell", 3, "N"], [7, "Aquatic Pals", "Blue Whale", 3, "N"], [7, "Aquatic Pals", "Dolphin Dash", 3, "N"], [7, "Aquatic Pals", "Starfish", 3, "N"], [7, "Aquatic Pals", "Deep Sea", 4, "N"], [7, "Aquatic Pals", "Pearl Finder", 4, "Y"], [8, "Jungle Jaunt", "Vines", 2, "N"], [8, "Jungle Jaunt", "Tropical Leaf", 2, "N"], [8, "Jungle Jaunt", "Monkey Mischief", 3, "N"], [8, "Jungle Jaunt", "Tiger Stripe", 3, "N"], [8, "Jungle Jaunt", "Parrots Perch", 3, "N"], [8, "Jungle Jaunt", "Hidden Path", 3, "N"], [8, "Jungle Jaunt", "Rain Forest", 4, "N"], [8, "Jungle Jaunt", "Lion King", 4, "N"], [8, "Jungle Jaunt", "Golden Gorilla", 4, "Y"], [9, "Farm Fun", "Red Barn", 2, "N"], [9, "Farm Fun", "Tractor Pull", 3, "N"], [9, "Farm Fun", "Hay Bale", 3, "N"], [9, "Farm Fun", "Farm Fresh", 3, "N"], [9, "Farm Fun", "Cow Bell", 3, "N"], [9, "Farm Fun", "Chicken Coop", 4, "N"], [9, "Farm Fun", "Piggy Bank", 4, "N"], [9, "Farm Fun", "Harvest Moon", 4, "Y"], [9, "Farm Fun", "Golden Egg", 4, "Y"], [10, "Desert Drive", "Sand Dune", 3, "N"], [10, "Desert Drive", "Oasis", 3, "N"], [10, "Desert Drive", "Cactus Bloom", 3, "N"], [10, "Desert Drive", "Scorpion", 3, "N"], [10, "Desert Drive", "Camel Caravan", 4, "N"], [10, "Desert Drive", "Mirage", 4, "N"], [10, "Desert Drive", "Pyramid", 4, "N"], [10, "Desert Drive", "Sphinx", 5, "N"], [10, "Desert Drive", "Sand Storm", 5, "Y"], [11, "Arctic Adventure", "Snow Flake", 3, "N"], [11, "Arctic Adventure", "Ice Berg", 3, "N"], [11, "Arctic Adventure", "Polar Bear", 4, "N"], [11, "Arctic Adventure", "Penguin Slide", 4, "N"], [11, "Arctic Adventure", "Igloo Home", 4, "N"], [11, "Arctic Adventure", "Frozen Lake", 4, "N"], [11, "Arctic Adventure", "Aurora Lights", 5, "N"], [11, "Arctic Adventure", "Arctic Fox", 5, "Y"], [11, "Arctic Adventure", "Glacial Gold", 5, "Y"], [12, "Mountain Peak", "Summit", 3, "N"], [12, "Mountain Peak", "Pine Tree", 3, "N"], [12, "Mountain Peak", "Eagle Eye", 4, "N"], [12, "Mountain Peak", "Rocky Trail", 4, "N"], [12, "Mountain Peak", "Hiking Boots", 4, "N"], [12, "Mountain Peak", "Campfire", 4, "N"], [12, "Mountain Peak", "High Altitude", 5, "N"], [12, "Mountain Peak", "Goat Climb", 5, "Y"], [12, "Mountain Peak", "Peak Perfection", 5, "Y"], [13, "Mach Paws", "Zoomie Mobile", 4, "N"], [13, "Mach Paws", "Pit Stop", 4, "N"], [13, "Mach Paws", "Speedy Scottie", 4, "N"], [13, "Mach Paws", "Fast Lane", 4, "N"], [13, "Mach Paws", "Turbo Tail", 4, "N"], [13, "Mach Paws", "Finish Line", 4, "N"], [13, "Mach Paws", "Engine Purr", 4, "N"], [13, "Mach Paws", "Checkered Flag", 4, "Y"], [13, "Mach Paws", "Race Day", 4, "Y"], [14, "Space Explorers", "Moon Walk", 4, "N"], [14, "Space Explorers", "Star Gazer", 4, "N"], [14, "Space Explorers", "Rocket Ship", 4, "N"], [14, "Space Explorers", "Alien Friend", 4, "N"], [14, "Space Explorers", "Planet Hop", 4, "N"], [14, "Space Explorers", "Milky Way", 5, "N"], [14, "Space Explorers", "Supernova", 5, "N"], [14, "Space Explorers", "Black Hole", 5, "Y"], [14, "Space Explorers", "Golden Galaxy", 5, "Y"], [15, "Deep Sea Discovery", "Submarine", 4, "N"], [15, "Deep Sea Discovery", "Angler Fish", 4, "N"], [15, "Deep Sea Discovery", "Giant Squid", 4, "N"], [15, "Deep Sea Discovery", "Treasure Chest", 4, "N"], [15, "Deep Sea Discovery", "Sunken Ship", 5, "N"], [15, "Deep Sea Discovery", "Neptune", 5, "N"], [15, "Deep Sea Discovery", "Trident", 5, "N"], [15, "Deep Sea Discovery", "Poseidon", 5, "Y"], [15, "Deep Sea Discovery", "Ocean King", 5, "Y"], [16, "Medieval Magic", "Castle Wall", 4, "N"], [16, "Medieval Magic", "Dragon Breath", 4, "N"], [16, "Medieval Magic", "Knight Armor", 4, "N"], [16, "Medieval Magic", "Magic Wand", 4, "N"], [16, "Medieval Magic", "Royal Throne", 5, "N"], [16, "Medieval Magic", "Excalibur", 5, "N"], [16, "Medieval Magic", "Merlin", 5, "N"], [16, "Medieval Magic", "Wizard Gold", 5, "Y"], [16, "Medieval Magic", "Holy Grail", 5, "Y"], [17, "Future Tech", "Robot Dog", 4, "N"], [17, "Future Tech", "Laser Tag", 4, "N"], [17, "Future Tech", "Cyber Space", 4, "N"], [17, "Future Tech", "Virtual Reality", 5, "N"], [17, "Future Tech", "Hologram", 5, "N"], [17, "Future Tech", "AI Brain", 5, "N"], [17, "Future Tech", "Time Machine", 5, "N"], [17, "Future Tech", "Circuit Gold", 5, "Y"], [17, "Future Tech", "Tech Titan", 5, "Y"], [18, "Garden Gala", "Rose Petal", 4, "N"], [18, "Garden Gala", "Butterfly", 4, "N"], [18, "Garden Gala", "Gazebo", 4, "N"], [18, "Garden Gala", "Fountain", 5, "N"], [18, "Garden Gala", "Stone Path", 5, "N"], [18, "Garden Gala", "Garden Gnome", 5, "N"], [18, "Garden Gala", "Secret Gate", 5, "N"], [18, "Garden Gala", "Flora Gold", 5, "Y"], [18, "Garden Gala", "Bloom Bliss", 5, "Y"], [19, "Musical Mayhem", "Drum Beat", 4, "N"], [19, "Musical Mayhem", "Guitar Riff", 4, "N"], [19, "Musical Mayhem", "Piano Key", 5, "N"], [19, "Musical Mayhem", "Saxophone", 5, "N"], [19, "Musical Mayhem", "Concert Stage", 5, "N"], [19, "Musical Mayhem", "Micro Phone", 5, "N"], [19, "Musical Mayhem", "Sound Wave", 5, "N"], [19, "Musical Mayhem", "Record Gold", 5, "Y"], [19, "Musical Mayhem", "Melody Master", 5, "Y"], [20, "Hello Kitty & Friends", "Hello Kitty", 5, "N"], [20, "Hello Kitty & Friends", "Cinnamoroll", 5, "N"], [20, "Hello Kitty & Friends", "My Melody", 5, "N"], [20, "Hello Kitty & Friends", "Keroppi", 5, "N"], [20, "Hello Kitty & Friends", "Badtz-Maru", 5, "N"], [20, "Hello Kitty & Friends", "Pompompurin", 5, "N"], [20, "Hello Kitty & Friends", "Picnic Friends", 5, "Y"], [20, "Hello Kitty & Friends", "Sanrio Garden", 5, "Y"], [20, "Hello Kitty & Friends", "Friendship Bow", 5, "Y"], [21, "Hollywood Pets", "Movie Star", 4, "N"], [21, "Hollywood Pets", "Red Carpet", 4, "N"], [21, "Hollywood Pets", "Popcorn", 4, "N"], [21, "Hollywood Pets", "Camera Action", 5, "N"], [21, "Hollywood Pets", "Director Chair", 5, "N"], [21, "Hollywood Pets", "Award Trophy", 5, "N"], [21, "Hollywood Pets", "Walk of Fame", 5, "N"], [21, "Hollywood Pets", "Cinema Gold", 5, "Y"], [21, "Hollywood Pets", "Oscar Paw", 5, "Y"], [22, "Winter Wonderland", "Ski Lift", 4, "N"], [22, "Winter Wonderland", "Snowman", 4, "N"], [22, "Winter Wonderland", "Sled Run", 5, "N"], [22, "Winter Wonderland", "Hot Cocoa", 5, "N"], [22, "Winter Wonderland", "Pine Cone", 5, "N"], [22, "Winter Wonderland", "Ice Skates", 5, "N"], [22, "Winter Wonderland", "Mittens", 5, "N"], [22, "Winter Wonderland", "Frost Gold", 5, "Y"], [22, "Winter Wonderland", "Winter King", 5, "Y"], [23, "Superhero Squad", "Cape Flight", 4, "N"], [23, "Superhero Squad", "Masked Hero", 4, "N"], [23, "Superhero Squad", "Power Punch", 5, "N"], [23, "Superhero Squad", "Gadget Belt", 5, "N"], [23, "Superhero Squad", "Secret Base", 5, "N"], [23, "Superhero Squad", "Flying Ace", 5, "N"], [23, "Superhero Squad", "Mighty Mutt", 5, "N"], [23, "Superhero Squad", "Hero Gold", 5, "Y"], [23, "Superhero Squad", "Justice Paw", 5, "Y"], [24, "Carnival Chaos", "Ferris Wheel", 4, "N"], [24, "Carnival Chaos", "Cotton Candy", 4, "N"], [24, "Carnival Chaos", "Roller Coaster", 5, "N"], [24, "Carnival Chaos", "Fun House", 5, "N"], [24, "Carnival Chaos", "Clown Nose", 5, "N"], [24, "Carnival Chaos", "Prize Booth", 5, "N"], [24, "Carnival Chaos", "Game Tent", 5, "N"], [24, "Carnival Chaos", "Carnival Gold", 5, "Y"], [24, "Carnival Chaos", "Midway Magic", 5, "Y"], [25, "Luxury Style", "Velvet Bed", 5, "N"], [25, "Luxury Style", "Silk Scarf", 5, "N"], [25, "Luxury Style", "Crystal Bowl", 5, "N"], [25, "Luxury Style", "Designer Leash", 5, "N"], [25, "Luxury Style", "Posh Penthouse", 5, "N"], [25, "Luxury Style", "Golden Bow", 4, "Y"], [25, "Luxury Style", "Golden Tophat", 5, "Y"], [25, "Luxury Style", "Golden Skateboard", 5, "Y"], [25, "Luxury Style", "Diamond Collar", 5, "Y"]];
+
+  function slug(s) {
+    return String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'').slice(0,60);
+  }
+
+  const ALBUM = (() => {
+    const sets = new Map();
+    for (let i=0;i<RAW_DB.length;i++) {
+      const [setId,setName,stickerName,stars,goldFlag] = RAW_DB[i];
+      if (!sets.has(setId)) sets.set(setId, { id:setId, name:setName, stickers:[] });
+      const st = {
+        id: `s${setId}_${i}_${slug(stickerName)}`,
+        setId, setName,
+        name: stickerName,
+        stars: Number(stars)||1,
+        gold: String(goldFlag).toUpperCase()==="Y"
+      };
+      sets.get(setId).stickers.push(st);
+    }
+    return Array.from(sets.values()).sort((a,b)=>a.id-b.id);
+  })();
+
+  const ALL_STICKERS = (() => {
+    const out=[];
+    for (const set of ALBUM) for (const st of set.stickers) out.push(st);
+    return out;
+  })();
+
+  const LS_KEY = "mogo_posh_pets_v8";
+  const now = () => Date.now();
+
+  function tzOffsetMinutes(timeZone, date){
+    const dtf = new Intl.DateTimeFormat("en-US", {
+      timeZone, hour12:false,
+      year:"numeric", month:"2-digit", day:"2-digit",
+      hour:"2-digit", minute:"2-digit", second:"2-digit"
+    });
+    const parts = dtf.formatToParts(date).reduce((acc,p)=> (acc[p.type]=p.value, acc), {});
+    const asUTC = Date.UTC(Number(parts.year), Number(parts.month)-1, Number(parts.day), Number(parts.hour), Number(parts.minute), Number(parts.second));
+    return (asUTC - date.getTime())/60000;
+  }
+
+
+  // New York reset helper: next reset at 00:00 America/New_York
+  function nyMidnightMs(d=new Date()) {
+    // convert local date to NY-like by using Intl
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/New_York",
+      year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute:"2-digit", second:"2-digit", hour12:false
+    }).formatToParts(d).reduce((acc,p)=> (acc[p.type]=p.value, acc), {});
+    const y = Number(parts.year), m = Number(parts.month), day = Number(parts.day);
+    // NY midnight for that date in NY, then map to UTC by constructing date in NY via ISO and letting Date parse as UTC
+    // We approximate by creating Date for UTC midnight then adjusting by NY offset at that time:
+    const approx = new Date(Date.UTC(y, m-1, day, 0,0,0));
+    // Find offset between NY time and UTC at approx moment
+    const nyStr = new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/New_York", hour12:false,
+      year:"numeric", month:"2-digit", day:"2-digit",
+      hour:"2-digit", minute:"2-digit", second:"2-digit"
+    }).format(approx);
+    const utcStr = new Intl.DateTimeFormat("en-US", {
+      timeZone: "UTC", hour12:false,
+      year:"numeric", month:"2-digit", day:"2-digit",
+      hour:"2-digit", minute:"2-digit", second:"2-digit"
+    }).format(approx);
+    // If strings differ by offset, adjust by parsing the time parts into minutes.
+    function toMin(str) {
+      const m = str.match(/(\d\d)\/(\d\d)\/(\d\d\d\d),\s*(\d\d):(\d\d):(\d\d)/);
+      if(!m) return 0;
+      const hh=Number(m[4]), mm=Number(m[5]);
+      return hh*60+mm;
+    }
+    let offMin = toMin(utcStr) - toMin(nyStr);
+    // Normalize to [-720,720]
+    while (offMin>720) offMin-=1440;
+    while (offMin<-720) offMin+=1440;
+    return approx.getTime() - offMin*60*1000;
+  }
+
+  function nextResetMs() {
+    // Daily reset at 3:00 AM America/New_York, robust across DST
+    const t = now();
+    const nyNow = new Date(new Intl.DateTimeFormat("en-US", {
+      timeZone:"America/New_York",
+      year:"numeric", month:"2-digit", day:"2-digit",
+      hour:"2-digit", minute:"2-digit", second:"2-digit", hour12:false
+    }).format(t));
+
+    // Get NY calendar date (Y/M/D) from Intl parts
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone:"America/New_York",
+      year:"numeric", month:"2-digit", day:"2-digit"
+    }).formatToParts(new Date(t)).reduce((acc,p)=> (acc[p.type]=p.value, acc), {});
+    const y = Number(parts.year), m = Number(parts.month), d = Number(parts.day);
+
+    // Compute UTC ms for NY 3:00 using timezone offset at that instant
+    function nyWallToUtcMs(Y,M,D,hh){
+      const guess = new Date(Date.UTC(Y, M-1, D, hh, 0, 0));
+      const off = tzOffsetMinutes("America/New_York", guess);
+      return Date.UTC(Y, M-1, D, hh, 0, 0) - off*60000;
+    }
+
+    let reset = nyWallToUtcMs(y,m,d,3);
+    if (reset <= t) {
+      // add one NY day
+      const nextDay = new Date(new Date(Date.UTC(y,m-1,d,12,0,0)).getTime() + 24*60*60*1000);
+      const np = new Intl.DateTimeFormat("en-US", {
+        timeZone:"America/New_York",
+        year:"numeric", month:"2-digit", day:"2-digit"
+      }).formatToParts(nextDay).reduce((acc,p)=> (acc[p.type]=p.value, acc), {});
+      reset = nyWallToUtcMs(Number(np.year), Number(np.month), Number(np.day), 3);
+    }
+    return reset;
+  }
+
+  function msToHMS(ms) {
+    if (ms < 0) ms = 0;
+    const total = Math.floor(ms/1000);
+    const h = Math.floor(total/3600);
+    const m = Math.floor((total%3600)/60);
+    const s = total%60;
+    return `${h}h ${m}m ${s}s`;
+  }
+
+  function msToDHMS(ms) {
+    if (ms < 0) ms = 0;
+    const total = Math.floor(ms/1000);
+    const d = Math.floor(total/86400);
+    const h = Math.floor((total%86400)/3600);
+    const m = Math.floor((total%3600)/60);
+    const s = total%60;
+    return d>0 ? `${d}d ${h}h ${m}m ${s}s` : `${h}h ${m}m ${s}s`;
+  }
+
+
+  function fmtDate(ts) {
+    try {
+      return new Date(ts).toLocaleString(undefined, {year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit"});
+    } catch(e) {
+      return String(ts);
+    }
+  }
+
+  function toast(msg, kind="ok") {
+    const wrap = el("toast-wrap");
+    const t = document.createElement("div");
+    t.className = "toast" + (kind==="error" ? " error" : kind==="info" ? " info" : "");
+    t.innerHTML = `<div>${msg}</div><div class="x">✖</div>`;
+    t.querySelector(".x").onclick = () => t.remove();
+    wrap.appendChild(t);
+    setTimeout(()=>{ if(t.isConnected) t.remove(); }, 4200);
+  }
+
+  function el(id) { return document.getElementById(id); }
+
+  // --------- State ----------
+  const defaultState = () => {
+    const end = now() + 7*24*60*60*1000;
+    return {
+      version: 8,
+      settings: {
+        prestigeFilter: false,
+        seasonEndTs: end,
+        blitz: { active:false, cards:[] },
+        fest: { active:false },
+        sendRules: { regularCapNormal:5, regularCapFest:10, blitzCap:5 },
+        vault: { protectGold:true },
+        optimizer: { budgetMode:"auto" },
+        approvals: {} // future: tradable whitelist, etc
+      },
+      activeAccId: 1,
+      accounts: [
+        { id:1, name:"Main", code:"", link:"", prestigeRuns:0, owned:{}, completedAt:null, equippedPetIds:[], petEquipSize:48 },
+        { id:2, name:"Alt 1", code:"", link:"", prestigeRuns:0, owned:{}, completedAt:null, equippedPetIds:[], petEquipSize:48 },
+        { id:3, name:"Alt 2", code:"", link:"", prestigeRuns:0, owned:{}, completedAt:null, equippedPetIds:[], petEquipSize:48 },
+      ],
+      plans: [],
+      sendLedger: {
+        windowId: null, // set on load
+        windows: {}
+      },
+      tradeHistory: [],
+      trends: { snapshots: [] },
+      showcase: { mode:"auto", have:[], need:[] }
+    };
+  };
+
+  let state = loadState();
+
+  function saveState() {
+    try {
+      localStorage.setItem(LS_KEY, JSON.stringify(state));
+    } catch(e) {
+      console.error(e);
+      toast("Save failed (localStorage).", "error");
+    }
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (!raw) return initLedger(defaultState());
+      const parsed = JSON.parse(raw);
+      // minimal migration: if old shape missing fields
+      const s = Object.assign(defaultState(), parsed);
+      s.settings = Object.assign(defaultState().settings, parsed.settings||{});
+      s.settings.blitz = Object.assign(defaultState().settings.blitz, (parsed.settings||{}).blitz||{});
+      s.settings.fest = Object.assign(defaultState().settings.fest, (parsed.settings||{}).fest||{});
+      s.settings.sendRules = Object.assign(defaultState().settings.sendRules, (parsed.settings||{}).sendRules||{});
+      s.settings.vault = Object.assign(defaultState().settings.vault, (parsed.settings||{}).vault||{});
+      s.settings.optimizer = Object.assign(defaultState().settings.optimizer, (parsed.settings||{}).optimizer||{});
+      s.trends = Object.assign(defaultState().trends, parsed.trends||{});
+      s.showcase = Object.assign(defaultState().showcase, parsed.showcase||{});
+      s.accounts = (parsed.accounts && parsed.accounts.length) ? parsed.accounts : defaultState().accounts;
+      s.plans = parsed.plans || [];
+      s.tradeHistory = parsed.tradeHistory || [];
+      s.sendLedger = parsed.sendLedger || defaultState().sendLedger;
+      return initLedger(s);
+    } catch(e) {
+      console.error(e);
+      return initLedger(defaultState());
+    }
+  }
+
+  function initLedger(s) {
+    const wid = sendWindowId();
+    s.sendLedger.windowId = wid;
+    if (!s.sendLedger.windows) s.sendLedger.windows = {};
+    if (!s.sendLedger.windows[wid]) {
+      s.sendLedger.windows[wid] = { regular: {}, blitz: {}, external: { regular:0, blitz:0 } };
+    }
+    return s;
+  }
+
+  function sendWindowId() {
+    // window id = NY date like YYYY-MM-DD based on current NY time
+    const d = new Date();
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone:"America/New_York",
+      year:"numeric", month:"2-digit", day:"2-digit"
+    }).formatToParts(d).reduce((a,p)=> (a[p.type]=p.value, a), {});
+    return `${parts.year}-${parts.month}-${parts.day}`;
+  }
+
+  function ensureWindow() {
+    const wid = sendWindowId();
+    state.sendLedger.windowId = wid;
+    if (!state.sendLedger.windows[wid]) {
+      state.sendLedger.windows[wid] = { regular: {}, blitz: {}, external: { regular:0, blitz:0 } };
+    }
+    return wid;
+  }
+
+  function activeAcc() {
+    return state.accounts.find(a => a.id === Number(state.activeAccId)) || state.accounts[0];
+  }
+
+  function getCount(acc, sid) {
+    return Number((acc.owned||{})[sid] || 0);
+  }
+
+  function setCount(acc, sid, n) {
+    if (!acc.owned) acc.owned = {};
+    if (n <= 0) delete acc.owned[sid];
+    else acc.owned[sid] = n;
+  }
+
+  function isStickerBlitzEligible(st) {
+    return !!(state.settings.blitz.active && st.gold && (state.settings.blitz.cards||[]).includes(st.id));
+  }
+
+  function getActiveRegularCap() {
+    const bm = state.settings.optimizer?.budgetMode || "auto";
+    if (bm === "force5") return Number(state.settings.sendRules.regularCapNormal||5);
+    if (bm === "force10") return Number(state.settings.sendRules.regularCapFest||10);
+    return state.settings.fest?.active ? Number(state.settings.sendRules.regularCapFest||10) : Number(state.settings.sendRules.regularCapNormal||5);
+  }
+
+  function getActiveBlitzCap() {
+    return Number(state.settings.sendRules.blitzCap||5);
+  }
+
+  function sendsUsed(accId, lane) {
+    ensureWindow();
+    const wid = state.sendLedger.windowId;
+    const laneObj = state.sendLedger.windows[wid][lane] || {};
+    return Number(laneObj[accId] || 0);
+  }
+
+  function addSend(accId, lane, details) {
+    ensureWindow();
+    const wid = state.sendLedger.windowId;
+    if (!state.sendLedger.windows[wid][lane]) state.sendLedger.windows[wid][lane] = {};
+    state.sendLedger.windows[wid][lane][accId] = (state.sendLedger.windows[wid][lane][accId] || 0) + 1;
+    state.tradeHistory.unshift({
+      id: `h_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+      ts: Date.now(),
+      type: details?.type || "send",
+      windowId: wid,
+      lane,
+      details: details || {}
+    });
+  }
+
+  // --------- Rendering ----------
+  function mountNav() {
+    document.querySelectorAll("[data-nav]").forEach(btn => {
+      btn.addEventListener("click", () => navTo(btn.getAttribute("data-nav")));
+    });
+  }
+
+  function navTo(key) {
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    document.querySelectorAll(".nav-bar .btn").forEach(b => b.classList.remove("active"));
+    el("panel-"+key).classList.add("active");
+    document.querySelector(`.nav-bar .btn[data-nav="${key}"]`)?.classList.add("active");
+    if(key === "pet") renderPetShowroom();
+    updateUI(); // refresh when entering
+  }
+
+  function rebuildAccountSelects() {
+    const sel = el("active-account");
+    const opts = state.accounts.map(a => `<option value="${a.id}">${a.name}</option>`).join("");
+    sel.innerHTML = opts;
+    sel.value = String(state.activeAccId);
+    sel.onchange = () => {
+      state.activeAccId = Number(sel.value);
+      saveState();
+      renderHeaderPet(); // header pet depends on account
+      updateUI();
+    };
+
+    const compL = el("comp-left");
+    const compR = el("comp-right");
+    compL.innerHTML = opts; compR.innerHTML = opts;
+    const ids = state.accounts.map(a=>a.id);
+    compL.value = String(ids[0]||1);
+    compR.value = String(ids[1]||ids[0]||1);
+    compL.onchange = renderCompare;
+    compR.onchange = renderCompare;
+
+    const sh = el("showcase-account");
+    sh.innerHTML = opts;
+    sh.value = String(state.activeAccId);
+    sh.onchange = () => {
+      state.activeAccId = Number(sh.value);
+      el("active-account").value = String(state.activeAccId);
+      saveState();
+      updateUI();
+    };
+  }
+
+  function rebuildSetFilter() {
+    const sf = el("set-filter");
+    const opt = [`<option value="all">Full album</option>`].concat(
+      ALBUM.map(s => `<option value="${s.id}">Set ${s.id}: ${s.name}</option>`)
+    ).join("");
+    sf.innerHTML = opt;
+    sf.onchange = () => updateUI();
+  }
+
+  function renderHeader() {
+    const acc = activeAcc();
+    const meta = [];
+    if (acc.code) meta.push(`Code: <strong>${escapeHtml(acc.code)}</strong>`);
+    if (acc.link) meta.push(`<a href="${escapeAttr(acc.link)}" target="_blank" rel="noopener">Invite link</a>`);
+    meta.push(`Prestige runs: <strong>${Number(acc.prestigeRuns||0)}</strong>`);
+    el("acc-meta").innerHTML = meta.join(" | ");
+
+    const seasonLeft = state.settings.seasonEndTs - now();
+    el("season-label").textContent = seasonLeft > 0 ? msToDHMS(seasonLeft) : "ended";
+    el("reset-label").textContent = msToDHMS(nextResetMs() - now());
+
+    // sends label
+    const regCap = getActiveRegularCap();
+    const blzCap = getActiveBlitzCap();
+    const usedReg = sendsUsed(acc.id, "regular");
+    const usedBlz = sendsUsed(acc.id, "blitz");
+    let lane = state.settings.blitz.active ? "blitz" : "regular";
+    let used = lane==="blitz" ? usedBlz : usedReg;
+    let cap = lane==="blitz" ? blzCap : regCap;
+    el("sends-label").textContent = `${used} / ${cap} (${lane})`;
+
+    el("pill-blitz").style.display = state.settings.blitz.active ? "inline-flex" : "none";
+    el("pill-fest").style.display = state.settings.fest.active ? "inline-flex" : "none";
+  }
+
+  
+  function renderAlbum() {
+    const acc = activeAcc();
+    const filter = el("set-filter").value || "all";
+    const prestigeFilter = !!el("prestige-toggle").checked;
+
+    const mode = (el("album-view-mode")?.value || "all");
+    const q = (el("album-q")?.value || "").trim().toLowerCase();
+    const sortMode = (el("album-sort")?.value || "set");
+    const compact = !!el("album-compact")?.checked;
+    document.body.classList.toggle("compact", compact);
+
+    const baseSets = (filter==="all") ? ALBUM : ALBUM.filter(s => String(s.id)===String(filter));
+
+    const setMeta = baseSets.map(set => {
+      const ownedInSet = set.stickers.reduce((a,st)=> a + (getCount(acc, st.id)>0 ? 1 : 0), 0);
+      return { set, ownedInSet, total:set.stickers.length, missing: set.stickers.length-ownedInSet };
+    });
+
+    function avgStars(set){
+      const total = set.stickers.reduce((a,s)=>a+Number(s.stars||1),0);
+      return total / Math.max(1,set.stickers.length);
+    }
+
+    if (sortMode==="missing-desc") setMeta.sort((a,b)=> b.missing-a.missing);
+    else if (sortMode==="missing-asc") setMeta.sort((a,b)=> a.missing-b.missing);
+    else if (sortMode==="stars-desc") setMeta.sort((a,b)=> avgStars(b.set)-avgStars(a.set));
+    else setMeta.sort((a,b)=> a.set.id-b.set.id);
+
+    function stickerPass(st) {
+      const c = getCount(acc, st.id);
+      if (q && !st.name.toLowerCase().includes(q)) return false;
+
+      if (mode==="missing") return c===0;
+      if (mode==="owned") return c>0;
+      if (mode==="dupes") return c>1;
+      if (mode==="gold") return !!st.gold;
+      if (mode==="blitz") return isStickerBlitzEligible(st);
+      return true;
+    }
+
+    const out = [];
+    for (const meta of setMeta) {
+      const set = meta.set;
+      const ownedInSet = meta.ownedInSet;
+      const total = meta.total;
+      const pct = Math.round(ownedInSet/total*100);
+
+      const stickers = set.stickers.filter(stickerPass);
+      if (!stickers.length) continue;
+
+      out.push(`
+        <div class="set-card">
+          <div class="set-header">
+            <div>Set ${set.id}: ${escapeHtml(set.name)} <span class="badge ${ownedInSet===total ? "ok":"warn"}" style="margin-left:8px;">${ownedInSet}/${total}</span></div>
+            <div class="mini">${pct}% ${prestigeFilter ? `| Prestige runs: ${Number(acc.prestigeRuns||0)}` : ""}</div>
+          </div>
+          <div class="card" style="border:none; box-shadow:none; margin:0; border-radius:0; padding:14px; background:#F9F9F9;">
+            <div class="grid">
+              ${stickers.map(st => stickerTile(acc, st)).join("")}
+            </div>
+          </div>
+        </div>
+      `);
+    }
+    el("album-container").innerHTML = out.join("");
+
+    el("album-container").querySelectorAll("[data-sticker]").forEach(node => {
+      const sid = node.getAttribute("data-sticker");
+      const action = node.getAttribute("data-action");
+      if(!sid || !action) return;
+      node.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        const st = ALL_STICKERS.find(x=>x.id===sid);
+        if (!st) return;
+        if (action==="toggle") {
+          const cur = getCount(acc, sid);
+          setCount(acc, sid, cur>0 ? 0 : 1);
+          saveState();
+          updateUI();
+          return;
+        }
+        if (action==="inc") {
+          const cur = getCount(acc, sid);
+          setCount(acc, sid, cur+1);
+          saveState();
+          updateUI();
+          return;
+        }
+        if (action==="dec") {
+          const cur = getCount(acc, sid);
+          setCount(acc, sid, Math.max(0, cur-1));
+          saveState();
+          updateUI();
+          return;
+        }
+        if (action==="plan") {
+          openPicker({
+            mode:"planSend",
+            senderId: acc.id,
+            receiverId: pickReceiverId(acc.id),
+            lane: isStickerBlitzEligible(st) ? "blitz" : "regular",
+            preselectStickerId: sid
+          });
+          return;
+        }
+      });
+    });
+  }
+
+
+  function stickerTile(acc, st) {
+    const c = getCount(acc, st.id);
+    const owned = c>0;
+    const dupe = c>1;
+    const gold = st.gold ? " gold" : "";
+    const ownedCls = owned ? " owned" : "";
+    const dupeCls = dupe ? " dupe" : "";
+    const missCls = (!owned) ? " missing" : "";
+    const badge = owned ? `<div class="count-badge">${c}</div>` : "";
+    const laneTag = (st.gold ? (isStickerBlitzEligible(st) ? "⚡" : "🔒") : "");
+    return `
+      <div class="sticker${gold}${ownedCls}${dupeCls}${missCls}" data-sticker="${st.id}" data-action="toggle" title="Click to toggle">
+        ${badge}
+        <div style="font-weight:900; font-size:.78rem; line-height:1.1;">${escapeHtml(st.name)}</div>
+        <div class="mini">${st.stars}⭐ ${st.gold ? "Gold" : ""} ${laneTag}</div>
+        <div class="action-row">
+          <div class="icon-btn btn-minus" data-sticker="${st.id}" data-action="dec" title="Minus">-</div>
+          <div class="icon-btn btn-plus" data-sticker="${st.id}" data-action="inc" title="Plus">+</div>
+          <div class="icon-btn btn-arrow" data-sticker="${st.id}" data-action="plan" title="Add to plan">➜</div>
+        </div>
+      </div>
+    `;
+  }
+
+
+
+  function renderProgress() {
+    const acc = activeAcc();
+    const totalOwned = ALL_STICKERS.reduce((a,st)=> a + (getCount(acc, st.id)>0 ? 1:0), 0);
+    const total = ALL_STICKERS.length;
+    const pct = Math.round(totalOwned/total*100);
+
+    const starsTotal = totalStars(acc);
+    const dupes = totalDupesCount(acc);
+
+    el("progress-kpis").innerHTML = `
+      <div class="box">Owned: ${totalOwned}/${total} (${pct}%)</div>
+      <div class="box">Stars: ${starsTotal}</div>
+      <div class="box">Duplicate stickers: ${dupes}</div>
+      <div class="box">Regular cap: ${getActiveRegularCap()}</div>
+      <div class="box">Blitz cap: ${getActiveBlitzCap()}</div>
+    `;
+
+    const setRows = ALBUM.map(set => {
+      const o = set.stickers.reduce((a,st)=>a+(getCount(acc,st.id)>0?1:0),0);
+      const t = set.stickers.length;
+      const bar = Math.round(o/t*100);
+      return `
+        <div style="margin:10px 0; background:#fff; border:2px dashed rgba(0,0,0,.25); padding:10px 12px; border-radius:14px;">
+          <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:center;">
+            <div style="font-weight:900;">Set ${set.id}: ${escapeHtml(set.name)}</div>
+            <div class="badge ${o===t?"ok":"warn"}">${o}/${t}</div>
+          </div>
+          <div style="height:14px; background:rgba(0,0,0,.08); border-radius:999px; overflow:hidden; margin-top:8px;">
+            <div style="height:100%; width:${bar}%; background: linear-gradient(90deg, #0072BC, #00A651);"></div>
+          </div>
+        </div>
+      `;
+    }).join("");
+    el("progress-sets").innerHTML = setRows;
+  }
+
+  function totalDupesCount(acc) {
+    let d=0;
+    for (const st of ALL_STICKERS) {
+      const c = getCount(acc, st.id);
+      if (c>1) d += (c-1);
+    }
+    return d;
+  }
+
+  function totalStars(acc) {
+    let s=0;
+    for (const st of ALL_STICKERS) {
+      const c = getCount(acc, st.id);
+      if (c>1) s += (c-1)*st.stars;
+    }
+    return s;
+  }
+
+  function getVaultClaimable(acc){
+    const stars = totalStars(acc);
+    let n = 0;
+    if(stars >= 250) n = 1;
+    if(stars >= 500) n = 2;
+    if(stars >= 700) n = 3;
+    return n;
+  }
+
+
+  function renderVault() {
+    const acc = activeAcc();
+    const stars = totalStars(acc);
+    el("vault-stars").textContent = String(stars);
+
+    const completed = isAlbumComplete(acc);
+    el("album-complete-hint").innerHTML = completed
+      ? `<span class="badge ok">Album complete</span> You can start a prestige run.`
+      : `<span class="badge warn">Not complete</span> Finish all stickers to start prestige.`;
+
+    el("btn-complete-album").disabled = !completed;
+    el("btn-undo-complete").style.display = acc.completedAt ? "inline-block" : "none";
+
+    const bubble = el("vault-bubble");
+    bubble.style.display = stars >= 250 ? "flex" : "none";
+
+    el("history-list").innerHTML = (state.tradeHistory.slice(0,25).map(h => {
+      return `<div>• <strong>${fmtDate(h.ts)}</strong> | ${escapeHtml(h.type)} | ${escapeHtml(h.lane||"")} ${h.details?.note ? " | "+escapeHtml(h.details.note) : ""}</div>`;
+    }).join("") || "<div class='mini'>No history yet.</div>");
+  }
+
+  function isAlbumComplete(acc) {
+    return ALL_STICKERS.every(st => getCount(acc, st.id) > 0);
+  }
+
+  
+  function openVault(cost) {
+    const acc = activeAcc();
+    const stars = totalStars(acc);
+    if (stars < cost) {
+      toast(`Not enough stars for ${cost} vault.`, "error");
+      return;
+    }
+
+    const protectGold = state.settings.vault?.protectGold !== false;
+
+    // Burn order:
+    // 1) non-gold dupes low stars -> high stars
+    // 2) gold dupes low stars -> high stars (only if needed, and blocked if protection enabled)
+    let remaining = cost;
+
+    const nonGold = ALL_STICKERS.filter(s=>!s.gold).slice().sort((a,b)=>a.stars-b.stars);
+    const gold = ALL_STICKERS.filter(s=>s.gold).slice().sort((a,b)=>a.stars-b.stars);
+
+    function burnFrom(list) {
+      for (const st of list) {
+        if (remaining <= 0) break;
+        let c = getCount(acc, st.id);
+        while (c > 1 && remaining > 0) {
+          c -= 1;
+          remaining -= st.stars;
+          setCount(acc, st.id, c);
+        }
+      }
+    }
+
+    burnFrom(nonGold);
+
+    if (remaining > 0) {
+      if (protectGold) {
+        toast("Vault burn would require gold dupes. Turn off gold protection in Admin to proceed.", "error");
+        // reload state to avoid partial burn
+        state = loadState();
+        updateUI();
+        return;
+      }
+      burnFrom(gold);
+    }
+
+    state.tradeHistory.unshift({
+      id:`h_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+      ts: Date.now(),
+      type: "vault",
+      windowId: state.sendLedger.windowId,
+      lane: "vault",
+      details: { note:`Opened ${cost} vault` }
+    });
+    saveState();
+    toast(`Opened vault ${cost}.`, "ok");
+    updateUI();
+  }
+
+  function completeAlbum() {
+    const acc = activeAcc();
+    if (!isAlbumComplete(acc)) return;
+    acc.completedAt = Date.now();
+    acc.prestigeRuns = Number(acc.prestigeRuns||0) + 1;
+    // Clear counts for a new run, keep account details
+    acc.owned = {};
+    state.tradeHistory.unshift({
+      id:`h_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+      ts: Date.now(),
+      type:"prestige",
+      windowId: state.sendLedger.windowId,
+      lane:"prestige",
+      details: { note:`Started prestige run #${acc.prestigeRuns}` }
+    });
+    saveState();
+    toast("Prestige started. Album cleared for new run.", "ok");
+    updateUI();
+  }
+
+  function undoCompletion() {
+    const acc = activeAcc();
+    if (!acc.completedAt) return;
+    acc.completedAt = null;
+    // no undo of cleared stickers (that would require snapshot), so we only clear the flag
+    state.tradeHistory.unshift({
+      id:`h_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+      ts: Date.now(),
+      type:"undo",
+      windowId: state.sendLedger.windowId,
+      lane:"prestige",
+      details: { note:"Undo completion flag (counts not restored)" }
+    });
+    saveState();
+    toast("Undo applied (counts were not restored).", "info");
+    updateUI();
+  }
+
+  // --------- Plans ----------
+  function renderPlans() {
+    if (!state.plans.length) {
+      el("plans-list").innerHTML = `<div class="card"><div class="mini">No plans yet. Click "New Plan Group".</div></div>`;
+      return;
+    }
+    const out = state.plans.map(plan => {
+      const sender = state.accounts.find(a=>a.id===plan.senderId);
+      const receiver = state.accounts.find(a=>a.id===plan.receiverId);
+      const sends = (plan.sends||[]).map(x => stickerLine(x)).join("");
+      const recvs = (plan.receives||[]).map(x => stickerLine(x)).join("");
+      return `
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:center;">
+            <div style="font-weight:900;">${escapeHtml(plan.title || "Plan")}</div>
+            <div class="mini">From <strong>${escapeHtml(sender?.name||"")}</strong> to <strong>${escapeHtml(receiver?.name||"")}</strong></div>
+          </div>
+          <div class="hr"></div>
+          <div class="row" style="align-items:flex-start;">
+            <div>
+              <div class="badge warn">Send</div>
+              <div class="mini">${sends || "<div class='mini'>Empty</div>"}</div>
+              <button class="btn btn-small btn-green" data-plan-add="${plan.id}" data-side="send">+ Add send</button>
+            </div>
+            <div style="flex:0 0 auto; min-width:auto; font-size:28px; font-weight:900; padding-top:26px;">⇄</div>
+            <div>
+              <div class="badge ok">Receive</div>
+              <div class="mini">${recvs || "<div class='mini'>Empty</div>"}</div>
+              <button class="btn btn-small btn-green" data-plan-add="${plan.id}" data-side="recv">+ Add receive</button>
+            </div>
+          </div>
+          <div class="hr"></div>
+          <div class="row">
+            <button class="btn btn-outline btn-small" data-plan-finalize="${plan.id}">Finalize (logs sends)</button>
+            <button class="btn btn-outline btn-small" data-plan-del="${plan.id}">Delete</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+    el("plans-list").innerHTML = out;
+
+    el("plans-list").querySelectorAll("[data-plan-add]").forEach(btn => {
+      btn.onclick = () => {
+        const pid = btn.getAttribute("data-plan-add");
+        const side = btn.getAttribute("data-side");
+        const plan = state.plans.find(p=>p.id===pid);
+        if(!plan) return;
+        openPicker({
+          mode: side==="send" ? "planSend" : "planRecv",
+          planId: pid,
+          senderId: plan.senderId,
+          receiverId: plan.receiverId
+        });
+      };
+    });
+    el("plans-list").querySelectorAll("[data-plan-del]").forEach(btn => {
+      btn.onclick = () => {
+        const pid = btn.getAttribute("data-plan-del");
+        state.plans = state.plans.filter(p=>p.id!==pid);
+        saveState(); updateUI();
+      };
+    });
+    el("plans-list").querySelectorAll("[data-plan-finalize]").forEach(btn => {
+      btn.onclick = () => {
+        const pid = btn.getAttribute("data-plan-finalize");
+        finalizePlan(pid);
+      };
+    });
+  }
+
+  function stickerLine(x) {
+    const st = ALL_STICKERS.find(s=>s.id===x.stickerId);
+    if(!st) return "";
+    const q = Number(x.qty||1);
+    const tag = st.gold ? (isStickerBlitzEligible(st) ? "⚡" : "🔒") : "";
+    return `<div style="display:flex; justify-content:space-between; gap:10px; align-items:center; margin:6px 0; padding:8px 10px; background:#fff; border:2px dashed rgba(0,0,0,.18); border-radius:12px;">
+      <div><strong>${escapeHtml(st.name)}</strong> <span class="mini">${st.stars}⭐ ${tag}</span></div>
+      <div class="badge">${q}x</div>
+    </div>`;
+  }
+
+  function newPlan() {
+    const acc = activeAcc();
+    const recvId = pickReceiverId(acc.id);
+    const id = `p_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+    state.plans.unshift({
+      id, title:`Plan ${new Date().toLocaleDateString()}`,
+      senderId: acc.id,
+      receiverId: recvId,
+      sends: [],
+      receives: [],
+      createdTs: Date.now()
+    });
+    saveState();
+    toast("Plan created.", "ok");
+    updateUI();
+  }
+
+  function pickReceiverId(senderId) {
+    const other = state.accounts.find(a=>a.id!==senderId);
+    return other ? other.id : senderId;
+  }
+
+  function finalizePlan(pid) {
+    const plan = state.plans.find(p=>p.id===pid);
+    if (!plan) return;
+    const sender = state.accounts.find(a=>a.id===plan.senderId);
+    if (!sender) return;
+
+    const regCap = getActiveRegularCap();
+    const blzCap = getActiveBlitzCap();
+    const usedReg = sendsUsed(sender.id, "regular");
+    const usedBlz = sendsUsed(sender.id, "blitz");
+
+    let needReg = 0, needBlz = 0;
+    for (const x of (plan.sends||[])) {
+      const st = ALL_STICKERS.find(s=>s.id===x.stickerId);
+      if (!st) continue;
+      const q = Number(x.qty||1);
+      if (isStickerBlitzEligible(st)) needBlz += q;
+      else needReg += q;
+    }
+
+    if (usedReg + needReg > regCap) {
+      toast(`Cannot finalize. Regular sends would be ${usedReg + needReg} / ${regCap}.`, "error");
+      return;
+    }
+    if (usedBlz + needBlz > blzCap) {
+      toast(`Cannot finalize. Blitz sends would be ${usedBlz + needBlz} / ${blzCap}.`, "error");
+      return;
+    }
+
+    // Log sends and optionally decrement dupes (not required in planner, but useful)
+    for (const x of (plan.sends||[])) {
+      const st = ALL_STICKERS.find(s=>s.id===x.stickerId);
+      if (!st) continue;
+      const q = Number(x.qty||1);
+      const lane = isStickerBlitzEligible(st) ? "blitz" : "regular";
+      for (let i=0;i<q;i++) addSend(sender.id, lane, { type:"send", note:`Plan ${plan.title}: sent ${st.name}` });
+      // decrement counts by q, but keep at least 0
+      const cur = getCount(sender, st.id);
+      setCount(sender, st.id, Math.max(0, cur - q));
+    }
+
+    state.tradeHistory.unshift({
+      id:`h_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+      ts: Date.now(),
+      type:"finalize",
+      windowId: state.sendLedger.windowId,
+      lane:"plan",
+      details: { note:`Finalized plan: ${plan.title}` }
+    });
+
+    saveState();
+    toast("Plan finalized. Sends logged and counts decremented.", "ok");
+    updateUI();
+  }
+
+  // --------- Compare ----------
+  function renderCompare() {
+    const left = state.accounts.find(a=>a.id===Number(el("comp-left").value));
+    const right = state.accounts.find(a=>a.id===Number(el("comp-right").value));
+    if (!left || !right) return;
+
+    const leftDupeToRight = possibleTrades(left, right).slice(0,60);
+    const rightDupeToLeft = possibleTrades(right, left).slice(0,60);
+
+    el("comp-view-left").innerHTML = `
+      <h3>${escapeHtml(left.name)}</h3>
+      <div class="mini">Drag these dupes to the right side to build a plan.</div>
+      <div class="hr"></div>
+      <div class="mini">${leftDupeToRight.length ? leftDupeToRight.map(t => tradeChip(t, left.id, right.id)).join("") : "No available dupes that the other side needs."}</div>
+    `;
+
+    el("comp-view-right").innerHTML = `
+      <h3>${escapeHtml(right.name)}</h3>
+      <div class="mini">Drag these dupes to the left side to build a plan.</div>
+      <div class="hr"></div>
+      <div class="mini">${rightDupeToLeft.length ? rightDupeToLeft.map(t => tradeChip(t, right.id, left.id)).join("") : "No available dupes that the other side needs."}</div>
+    `;
+
+    // drop zones
+    setupDropZone(el("comp-view-left"), right.id, left.id);
+    setupDropZone(el("comp-view-right"), left.id, right.id);
+
+    // draggable items
+    document.querySelectorAll("[draggable='true'][data-trade]").forEach(n => {
+      n.addEventListener("dragstart", (ev) => {
+        ev.dataTransfer.setData("text/plain", n.getAttribute("data-trade"));
+      });
+    });
+  }
+
+  function tradeChip(t, senderId, receiverId) {
+    const st = ALL_STICKERS.find(s=>s.id===t.stickerId);
+    if (!st) return "";
+    const tag = st.gold ? (isStickerBlitzEligible(st) ? "⚡" : "🔒") : "";
+    return `<div draggable="true" data-trade="${senderId}|${receiverId}|${t.stickerId}" style="display:flex; justify-content:space-between; gap:10px; align-items:center; padding:10px 12px; margin:8px 0; border:2px solid #333; border-radius:14px; background:#fff; cursor:grab;">
+      <div><strong>${escapeHtml(st.name)}</strong> <span class="mini">${st.stars}⭐ ${tag}</span></div>
+      <div class="badge">dupe</div>
+    </div>`;
+  }
+
+  function setupDropZone(zoneEl, senderId, receiverId) {
+    zoneEl.addEventListener("dragover", (ev) => {
+      ev.preventDefault();
+      zoneEl.classList.add("drag-over");
+    });
+    zoneEl.addEventListener("dragleave", () => zoneEl.classList.remove("drag-over"));
+    zoneEl.addEventListener("drop", (ev) => {
+      ev.preventDefault();
+      zoneEl.classList.remove("drag-over");
+      const data = ev.dataTransfer.getData("text/plain") || "";
+      const [sId, rId, stickerId] = data.split("|");
+      if (Number(sId) !== senderId || Number(rId) !== receiverId) {
+        // still allow but map to current view
+      }
+      ensurePlanForCompare(senderId, receiverId, stickerId);
+    });
+  }
+
+  function ensurePlanForCompare(senderId, receiverId, stickerId) {
+    let plan = state.plans.find(p => p.senderId===senderId && p.receiverId===receiverId);
+    if (!plan) {
+      const id = `p_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+      plan = { id, title:`Compare plan`, senderId, receiverId, sends:[], receives:[], createdTs: Date.now() };
+      state.plans.unshift(plan);
+    }
+    plan.sends.push({ stickerId, qty:1 });
+    saveState();
+    toast("Added to a plan from compare.", "ok");
+    updateUI();
+    navTo("plan");
+  }
+
+  // --------- Smart trades ----------
+  function possibleTrades(sender, receiver) {
+    const out=[];
+    for (const st of ALL_STICKERS) {
+      const have = getCount(sender, st.id);
+      const need = getCount(receiver, st.id);
+      if (have > 1 && need === 0) {
+        out.push({
+          senderId: sender.id,
+          receiverId: receiver.id,
+          stickerId: st.id,
+          stars: st.stars,
+          gold: st.gold,
+          setId: st.setId
+        });
+      }
+    }
+    return out;
+  }
+
+  function computeSmart(strategy, maxN) {
+    const suggestions=[];
+    for (const sender of state.accounts) {
+      for (const receiver of state.accounts) {
+        if (sender.id === receiver.id) continue;
+        const trades = possibleTrades(sender, receiver);
+        for (const t of trades) suggestions.push(t);
+      }
+    }
+
+    const byKey = new Map();
+    for (const s of suggestions) {
+      const k = `${s.senderId}|${s.receiverId}|${s.stickerId}`;
+      if (!byKey.has(k)) byKey.set(k, s);
+    }
+    const uniq = Array.from(byKey.values());
+
+    const max = Number(maxN||30);
+
+    if (strategy==="blitz") {
+      return uniq.filter(s => {
+        const st = ALL_STICKERS.find(x=>x.id===s.stickerId);
+        return st && isStickerBlitzEligible(st);
+      }).slice(0,max);
+    }
+
+    if (strategy==="high") {
+      return uniq.sort((a,b)=>b.stars-a.stars).slice(0,max);
+    }
+    if (strategy==="low") {
+      return uniq.sort((a,b)=>a.stars-b.stars).slice(0,max);
+    }
+    if (strategy==="set") {
+      // prioritize pairs where sender gives within same set that receiver is close to completing
+      return uniq.sort((a,b)=>scoreSetCloser(b)-scoreSetCloser(a)).slice(0,max);
+    }
+    if (strategy==="closers") {
+      return uniq.sort((a,b)=>scoreCloser(b)-scoreCloser(a)).slice(0,max);
+    }
+    if (strategy==="optimizer") {
+      // greedy: keep within caps per sender, favor closers, then stars
+      const out=[];
+      const used = new Map(); // sender|lane -> used
+      const sorted = uniq.slice().sort((a,b)=> {
+        const sc = scoreCloser(b)-scoreCloser(a);
+        if (sc!==0) return sc;
+        return b.stars-a.stars;
+      });
+      for (const s of sorted) {
+        const st = ALL_STICKERS.find(x=>x.id===s.stickerId);
+        const lane = (st && isStickerBlitzEligible(st)) ? "blitz" : "regular";
+        const key = `${s.senderId}|${lane}`;
+        const cur = used.get(key) || 0;
+        const cap = lane==="blitz" ? getActiveBlitzCap() : getActiveRegularCap();
+        const already = sendsUsed(s.senderId, lane);
+        if (already + cur + 1 > cap) continue;
+        used.set(key, cur+1);
+        out.push(s);
+        if (out.length >= max) break;
+      }
+      return out;
+    }
+    
+    if (strategy==="multi") {
+      const out = [];
+      for (const target of state.accounts) {
+        for (const set of ALBUM) {
+          const missing = set.stickers.filter(st => getCount(target, st.id) === 0);
+          if (missing.length !== 1) continue;
+          const need = missing[0];
+          const suppliers = state.accounts
+            .filter(a => a.id!==target.id && getCount(a, need.id) > 1)
+            .sort((a,b)=> (getCount(b, need.id)-getCount(a, need.id)));
+          suppliers.slice(0,2).forEach(sup => {
+            out.push({
+              senderId: sup.id,
+              receiverId: target.id,
+              stickerId: need.id,
+              stars: need.stars,
+              gold: need.gold,
+              setId: need.setId,
+              note: `Closes set ${set.id} for ${target.name}`
+            });
+          });
+        }
+      }
+      const map = new Map();
+      for (const s of out) {
+        const k = `${s.senderId}|${s.receiverId}|${s.stickerId}`;
+        if (!map.has(k)) map.set(k, s);
+      }
+      return Array.from(map.values()).slice(0,max);
+    }
+
+    return uniq.slice(0,max);
+  }
+
+  function scoreCloser(s) {
+    const receiver = state.accounts.find(a=>a.id===s.receiverId);
+    if (!receiver) return 0;
+    const set = ALBUM.find(x=>x.id===s.setId);
+    if (!set) return 0;
+    const owned = set.stickers.reduce((a,st)=> a + (getCount(receiver, st.id)>0?1:0), 0);
+    const missing = set.stickers.length - owned;
+    return missing===1 ? 100 : missing===2 ? 40 : missing===3 ? 12 : 0;
+  }
+
+  function scoreSetCloser(s) {
+    // same as closer for now, can be expanded
+    return scoreCloser(s);
+  }
+
+  function renderSmart() {
+    const strat = el("smart-strategy").value;
+    const maxN = Number(el("smart-max").value||30);
+    const list = computeSmart(strat, maxN);
+
+    if (!list.length) {
+      el("smart-list").innerHTML = `<div class="card"><div class="mini">No suggestions for this strategy.</div></div>`;
+      return;
+    }
+
+    const rows = list.map(s => {
+      const st = ALL_STICKERS.find(x=>x.id===s.stickerId);
+      const sender = state.accounts.find(a=>a.id===s.senderId);
+      const receiver = state.accounts.find(a=>a.id===s.receiverId);
+      const tag = st?.gold ? (isStickerBlitzEligible(st) ? "⚡" : "🔒") : "";
+      return `
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:center;">
+            <div style="font-weight:900;">${escapeHtml(st?.name||"")} <span class="mini">${st?.stars||""}⭐ ${tag}</span></div>
+            <div class="mini"><strong>${escapeHtml(sender?.name||"")}</strong> ➜ <strong>${escapeHtml(receiver?.name||"")}</strong></div>
+          </div>
+          <div class="hr"></div>
+          <div class="row">
+            <button class="btn btn-small btn-green" data-smart-add="${s.senderId}|${s.receiverId}|${s.stickerId}">Add to plan</button>
+            <button class="btn btn-small btn-outline" data-smart-swap="${s.senderId}|${s.receiverId}|${s.stickerId}">Swap active to sender</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    el("smart-list").innerHTML = rows;
+
+    el("smart-list").querySelectorAll("[data-smart-add]").forEach(btn => {
+      btn.onclick = () => {
+        const [senderId, receiverId, stickerId] = btn.getAttribute("data-smart-add").split("|").map(x=>x);
+        ensurePlanForCompare(Number(senderId), Number(receiverId), stickerId);
+      };
+    });
+
+    el("smart-list").querySelectorAll("[data-smart-swap]").forEach(btn => {
+      btn.onclick = () => {
+        const [senderId] = btn.getAttribute("data-smart-swap").split("|");
+        state.activeAccId = Number(senderId);
+        saveState();
+        updateUI();
+        toast("Active account switched to sender.", "info");
+      };
+    });
+  }
+
+  // --------- Showcase ----------
+  function renderShowcase() {
+    const acc = activeAcc();
+    el("showcase-user").innerHTML = `${escapeHtml(acc.name)} ${acc.code ? " | " + escapeHtml(acc.code) : ""}`;
+    // Link + QR
+    const link = (acc.link||"").trim();
+    const code = (acc.code||"").trim();
+    const linkLine = link ? `<strong>Link:</strong> <span style="word-break:break-all;">${escapeHtml(link)}</span>` : (code ? `<strong>Code:</strong> ${escapeHtml(code)}` : "");
+    el("showcase-linkline").innerHTML = linkLine;
+    const qrWrap = el("showcase-qr-wrap");
+    const qrImg = el("showcase-qr");
+    if(link){
+      qrWrap.style.display = "flex";
+      // Uses a public QR image service (needs internet). Still works great for local files.
+      qrImg.src = "https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=" + encodeURIComponent(link);
+    } else {
+      qrWrap.style.display = "none";
+      qrImg.removeAttribute("src");
+    }
+    el("showcase-date").textContent = new Date().toLocaleString();
+
+    const mode = state.showcase.mode || "auto";
+    el("showcase-pill").textContent = `Mode: ${mode==="auto" ? "Auto" : "Manual"}`;
+
+    if (mode === "auto") {
+      const haves = topDupes(acc, 12);
+      const needs = topNeeds(acc, 12);
+      el("showcase-haves").innerHTML = haves.length ? haves.map(x=>showcaseLine(x)).join("") : "<div>None</div>";
+      el("showcase-needs").innerHTML = needs.length ? needs.map(x=>showcaseLine(x)).join("") : "<div>None</div>";
+      el("showcase-have-controls").style.display = "none";
+      el("showcase-need-controls").style.display = "none";
+    } else {
+      el("showcase-have-controls").style.display = "block";
+      el("showcase-need-controls").style.display = "block";
+      el("showcase-haves").innerHTML = (state.showcase.have||[]).map(id => showcaseLineById(id)).join("") || "<div>Empty</div>";
+      el("showcase-needs").innerHTML = (state.showcase.need||[]).map(id => showcaseLineById(id)).join("") || "<div>Empty</div>";
+
+      // populate dropdowns
+      el("showcase-add-have").innerHTML = ALL_STICKERS.map(s=>`<option value="${s.id}">${s.name} (${s.stars}⭐${s.gold?" gold":""})</option>`).join("");
+      el("showcase-add-need").innerHTML = ALL_STICKERS.map(s=>`<option value="${s.id}">${s.name} (${s.stars}⭐${s.gold?" gold":""})</option>`).join("");
+    }
+  }
+
+  function topDupes(acc, n) {
+    const arr = ALL_STICKERS.map(st => ({
+      stickerId: st.id, stars: st.stars, gold: st.gold, count: getCount(acc, st.id)
+    })).filter(x => x.count > 1);
+    arr.sort((a,b)=> (b.stars-a.stars) || (b.count-a.count));
+    return arr.slice(0,n);
+  }
+
+  function topNeeds(acc, n) {
+    const arr = ALL_STICKERS.map(st => ({
+      stickerId: st.id, stars: st.stars, gold: st.gold, count: getCount(acc, st.id)
+    })).filter(x => x.count === 0);
+    arr.sort((a,b)=> b.stars-a.stars);
+    return arr.slice(0,n);
+  }
+
+  function showcaseLine(x) {
+    const st = ALL_STICKERS.find(s=>s.id===x.stickerId);
+    if(!st) return "";
+    const tag = st.gold ? (isStickerBlitzEligible(st) ? "⚡" : "🔒") : "";
+    return `<div style="display:flex; justify-content:space-between; gap:10px; padding:8px 10px; margin:6px 0; border:2px dashed rgba(0,0,0,.18); border-radius:12px; background:#fff;">
+      <div><strong>${escapeHtml(st.name)}</strong> <span class="mini">${st.stars}⭐ ${tag}</span></div>
+      <div class="badge">${x.count>1 ? (x.count-1)+" dupes" : "need"}</div>
+    </div>`;
+  }
+
+  function showcaseLineById(id) {
+    const st = ALL_STICKERS.find(s=>s.id===id);
+    if (!st) return "";
+    const tag = st.gold ? (isStickerBlitzEligible(st) ? "⚡" : "🔒") : "";
+    return `<div style="display:flex; justify-content:space-between; gap:10px; padding:8px 10px; margin:6px 0; border:2px dashed rgba(0,0,0,.18); border-radius:12px; background:#fff;">
+      <div><strong>${escapeHtml(st.name)}</strong> <span class="mini">${st.stars}⭐ ${tag}</span></div>
+      <div class="badge">•</div>
+    </div>`;
+  }
+
+  function showcaseAdd(kind) {
+    const id = kind==="have" ? el("showcase-add-have").value : el("showcase-add-need").value;
+    if (!id) return;
+    if (kind==="have") {
+      state.showcase.have = Array.from(new Set([...(state.showcase.have||[]), id]));
+    } else {
+      state.showcase.need = Array.from(new Set([...(state.showcase.need||[]), id]));
+    }
+    saveState();
+    renderShowcase();
+  }
+
+  function copyShowcaseText() {
+    const acc = activeAcc();
+    const mode = state.showcase.mode || "auto";
+    let haves=[], needs=[];
+    if (mode==="auto") {
+      haves = topDupes(acc, 15).map(x=>x.stickerId);
+      needs = topNeeds(acc, 15).map(x=>x.stickerId);
+    } else {
+      haves = state.showcase.have||[];
+      needs = state.showcase.need||[];
+    }
+    const name = acc.name;
+    const haveNames = haves.map(id=>ALL_STICKERS.find(s=>s.id===id)?.name).filter(Boolean).join(", ");
+    const needNames = needs.map(id=>ALL_STICKERS.find(s=>s.id===id)?.name).filter(Boolean).join(", ");
+    const text = `POSH PETS | ${name}\nHave: ${haveNames || "none"}\nNeed: ${needNames || "none"}`;
+    navigator.clipboard?.writeText(text).then(()=>toast("Showcase text copied.", "ok")).catch(()=>toast(text, "info"));
+  }
+
+  // --------- Trends ----------
+  function takeSnapshot() {
+    const ts = Date.now();
+    const snap = {
+      ts,
+      windowId: state.sendLedger.windowId,
+      accounts: state.accounts.map(a => {
+        const owned = ALL_STICKERS.reduce((k,st)=> k + (getCount(a, st.id)>0?1:0), 0);
+        return {
+          id: a.id, name: a.name,
+          owned, total: ALL_STICKERS.length,
+          pct: Math.round(owned/ALL_STICKERS.length*100),
+          stars: totalStars(a),
+          dupes: totalDupesCount(a),
+          regUsed: sendsUsed(a.id, "regular"),
+          blzUsed: sendsUsed(a.id, "blitz"),
+        };
+      })
+    };
+    state.trends.snapshots.unshift(snap);
+    saveState();
+    toast("Snapshot saved.", "ok");
+    renderTrends();
+  }
+
+  
+  function renderTrends() {
+    const snaps = state.trends.snapshots || [];
+    if (!snaps.length) {
+      el("trends-content").innerHTML = "<div class='mini'>No snapshots yet.</div>";
+      drawEmptyCharts();
+      return;
+    }
+    const latest = snaps[0];
+    const prev = snaps[1] || null;
+
+    const tableRows = latest.accounts.map(a => {
+      const p = prev ? prev.accounts.find(x=>x.id===a.id) : null;
+      const dp = p ? (a.pct - p.pct) : 0;
+      const ds = p ? (a.stars - p.stars) : 0;
+      const dd = p ? (a.dupes - p.dupes) : 0;
+      const dpp = (x) => x===0 ? "" : `<span class="mini" style="margin-left:6px; color:${x>0?"#0a7":"#c33"};">${x>0?"+":""}${x}</span>`;
+      return `<tr>
+        <td><strong>${escapeHtml(a.name)}</strong></td>
+        <td>${a.owned}/${a.total} (${a.pct}%) ${dpp(dp)}</td>
+        <td>${a.stars} ${dpp(ds)}</td>
+        <td>${a.dupes} ${dpp(dd)}</td>
+        <td>${a.regUsed} / ${getActiveRegularCap()}</td>
+        <td>${a.blzUsed} / ${getActiveBlitzCap()}</td>
+      </tr>`;
+    }).join("");
+
+    el("trends-content").innerHTML = `
+      <div class="mini">Latest: <strong>${fmtDate(latest.ts)}</strong> ${prev ? `| Previous: <strong>${fmtDate(prev.ts)}</strong>` : ""}</div>
+      <div class="hr"></div>
+      <table class="table">
+        <thead><tr><th>Account</th><th>Completion</th><th>Stars</th><th>Dupes</th><th>Regular sends</th><th>Blitz sends</th></tr></thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+    `;
+
+    drawBarChart("chart-completion", "Completion %", latest.accounts.map(a=>a.name), latest.accounts.map(a=>a.pct), 100);
+    const maxStars = Math.max(...latest.accounts.map(a=>a.stars), 1);
+    drawBarChart("chart-stars", "Vault Stars", latest.accounts.map(a=>a.name), latest.accounts.map(a=>a.stars), maxStars);
+  }
+
+  function drawEmptyCharts(){
+    drawBarChart("chart-completion", "Completion %", [], [], 100);
+    drawBarChart("chart-stars", "Vault Stars", [], [], 1);
+  }
+
+  function drawBarChart(canvasId, title, labels, values, maxV){
+    const c = el(canvasId);
+    if(!c) return;
+    const ctx = c.getContext("2d");
+    const W=c.width, H=c.height;
+    ctx.clearRect(0,0,W,H);
+
+    ctx.fillStyle = "#222";
+    ctx.font = "900 16px system-ui";
+    ctx.fillText(title, 14, 22);
+
+    ctx.strokeStyle = "rgba(0,0,0,.25)";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(10, 32, W-20, H-46);
+
+    if(!labels.length){
+      ctx.fillStyle = "rgba(0,0,0,.55)";
+      ctx.font = "800 14px system-ui";
+      ctx.fillText("Take a snapshot to chart results.", 18, 62);
+      return;
+    }
+
+    const left=18, top=44, right=W-18, bottom=H-18;
+    const innerW = right-left;
+    const innerH = bottom-top;
+    const n = labels.length;
+    const gap = 10;
+    const barW = Math.max(18, Math.floor((innerW - gap*(n-1)) / n));
+
+    for(let i=0;i<n;i++){
+      const v = values[i] ?? 0;
+      const h = Math.round((v / Math.max(maxV,1)) * (innerH-34));
+      const x = left + i*(barW+gap);
+      const y = bottom - h;
+
+      ctx.fillStyle = "rgba(0,114,188,.75)";
+      ctx.fillRect(x, y, barW, h);
+
+      ctx.fillStyle = "#222";
+      ctx.font = "900 12px system-ui";
+      ctx.fillText(String(v), x, y-6);
+
+      ctx.save();
+      ctx.translate(x+2, bottom+4);
+      ctx.rotate(-Math.PI/6);
+      ctx.fillStyle = "rgba(0,0,0,.75)";
+      ctx.font = "800 11px system-ui";
+      ctx.fillText(labels[i], 0, 0);
+      ctx.restore();
+    }
+  }
+
+
+  // --------- Import / export ----------
+  function exportText(filename, text, mime="text/plain") {
+    const blob = new Blob([text], {type:mime});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 2000);
+  }
+
+  function exportAlbumMasterCSV() {
+    const header = ["Album","Set#","Set Name","Sticker Name","Stars","Gold"].join(",");
+    const rows = [];
+    for (const st of ALL_STICKERS) {
+      rows.push(["Posh Pets", st.setId, csv(st.setName), csv(st.name), st.stars, st.gold ? "Y":"N"].join(","));
+    }
+    exportText("posh_pets_master.csv", [header].concat(rows).join("\n"), "text/csv");
+  }
+
+  function exportActiveCSV() {
+    const acc = activeAcc();
+    const header = ["Set#","Set Name","Sticker Name","Stars","Gold","Count"].join(",");
+    const rows = [];
+    for (const st of ALL_STICKERS) {
+      rows.push([st.setId, csv(st.setName), csv(st.name), st.stars, st.gold ? "Y":"N", getCount(acc, st.id)].join(","));
+    }
+    exportText(`posh_pets_${slug(acc.name)||"account"}.csv`, [header].concat(rows).join("\n"), "text/csv");
+  }
+
+  function exportAllJSON() {
+    exportText("mogo_posh_pets_all.json", JSON.stringify(state, null, 2), "application/json");
+  }
+
+  function exportPlansJSON() {
+    exportText("mogo_posh_pets_plans.json", JSON.stringify(state.plans||[], null, 2), "application/json");
+  }
+
+  function exportSnapshotsJSON() {
+    exportText("mogo_posh_pets_snapshots.json", JSON.stringify(state.trends.snapshots||[], null, 2), "application/json");
+  }
+
+  function exportActiveJSON() {
+    const acc = activeAcc();
+    exportText(`posh_pets_${slug(acc.name)||"account"}.json`, JSON.stringify(acc, null, 2), "application/json");
+  }
+
+  function applyImport() {
+    const acc = activeAcc();
+    const txt = el("import-text").value || "";
+    const merge = el("import-merge").checked;
+    const ignoreUnknown = el("import-ignore-unknown").checked;
+
+    let updated = 0, unknown = 0;
+    const lines = txt.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+    for (const line of lines) {
+      const parts = line.split(/\t|,/).map(x=>x.trim()).filter(Boolean);
+      if (parts.length < 2) continue;
+
+      let name = parts[0];
+      let cntStr = parts[1];
+
+      // if first column is set#, then sticker name at 2
+      if (/^\d+$/.test(parts[0]) && parts.length >= 3) {
+        name = parts[1];
+        cntStr = parts[2];
+      }
+
+      const count = Math.max(0, Number(cntStr)||0);
+      const st = ALL_STICKERS.find(s => s.name.toLowerCase() === name.toLowerCase());
+      if (!st) {
+        unknown += 1;
+        if (!ignoreUnknown) toast(`Unknown sticker: ${name}`, "error");
+        continue;
+      }
+      const cur = getCount(acc, st.id);
+      const next = merge ? (cur + count) : count;
+      setCount(acc, st.id, next);
+      updated += 1;
+    }
+    saveState();
+    toast(`Import applied. Updated ${updated} rows. Unknown ${unknown}.`, updated ? "ok" : "info");
+    updateUI();
+  }
+
+  // --------- Admin accounts ----------
+  function renderAdmin() {
+    el("blitz-active").checked = !!state.settings.blitz.active;
+    el("fest-active").checked = !!state.settings.fest.active;
+
+    el("cap-normal").value = Number(state.settings.sendRules.regularCapNormal||5);
+    el("cap-fest").value = Number(state.settings.sendRules.regularCapFest||10);
+    el("cap-blitz").value = Number(state.settings.sendRules.blitzCap||5);
+
+    el("cap-normal-label").textContent = String(el("cap-normal").value);
+    el("cap-fest-label").textContent = String(el("cap-fest").value);
+    el("cap-blitz-label").textContent = String(el("cap-blitz").value);
+
+    el("opt-budget").value = state.settings.optimizer.budgetMode || "auto";
+    el("vault-protect-gold").checked = state.settings.vault?.protectGold !== false;
+
+    // blitz cards list (gold only)
+    const golds = ALL_STICKERS.filter(s=>s.gold);
+    const select = el("blitz-cards");
+    select.innerHTML = golds.map(s => `<option value="${s.id}">${s.name} (Set ${s.setId})</option>`).join("");
+    const chosen = new Set(state.settings.blitz.cards||[]);
+    for (const opt of select.options) opt.selected = chosen.has(opt.value);
+
+    // accounts
+    const rows = state.accounts.map(a => `
+      <div class="card" style="margin-bottom:10px;">
+        <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:center;">
+          <div style="font-weight:900;">${escapeHtml(a.name)}</div>
+          <div class="mini">ID: ${a.id} | Prestige: ${Number(a.prestigeRuns||0)}</div>
+        </div>
+        <div class="mini">${a.code ? "Code: "+escapeHtml(a.code) : ""} ${a.link ? " | " : ""} ${a.link ? `<a href="${escapeAttr(a.link)}" target="_blank" rel="noopener">Invite</a>` : ""}</div>
+        <div class="hr"></div>
+        <div class="row">
+          <button class="btn btn-small btn-outline" data-edit="${a.id}">Edit</button>
+          <button class="btn btn-small btn-outline" data-clear="${a.id}">Clear album</button>
+          <button class="btn btn-small btn-outline" data-del="${a.id}">Delete</button>
+        </div>
+      </div>
+    `).join("");
+    el("admin-accounts").innerHTML = rows || "<div class='mini'>No accounts.</div>";
+
+    el("admin-accounts").querySelectorAll("[data-edit]").forEach(b => {
+      b.onclick = () => openAccountModal(Number(b.getAttribute("data-edit")));
+    });
+    el("admin-accounts").querySelectorAll("[data-clear]").forEach(b => {
+      b.onclick = () => {
+        const id = Number(b.getAttribute("data-clear"));
+        const a = state.accounts.find(x=>x.id===id);
+        if (!a) return;
+        a.owned = {};
+        saveState();
+        toast("Album cleared.", "ok");
+        updateUI();
+      };
+    });
+    el("admin-accounts").querySelectorAll("[data-del]").forEach(b => {
+      b.onclick = () => {
+        const id = Number(b.getAttribute("data-del"));
+        if (state.accounts.length <= 1) {
+          toast("Need at least one account.", "error");
+          return;
+        }
+        state.accounts = state.accounts.filter(x=>x.id!==id);
+        if (!state.accounts.find(x=>x.id===state.activeAccId)) state.activeAccId = state.accounts[0].id;
+        saveState();
+        toast("Account deleted.", "info");
+        updateUI();
+      };
+    });
+  }
+
+  function applyAdminSettings() {
+    state.settings.blitz.active = !!el("blitz-active").checked;
+    state.settings.fest.active = !!el("fest-active").checked;
+    state.settings.sendRules.regularCapNormal = Number(el("cap-normal").value||5);
+    state.settings.sendRules.regularCapFest = Number(el("cap-fest").value||10);
+    state.settings.sendRules.blitzCap = Number(el("cap-blitz").value||5);
+    state.settings.optimizer.budgetMode = el("opt-budget").value || "auto";
+    state.settings.vault.protectGold = !!el("vault-protect-gold").checked;
+
+    const select = el("blitz-cards");
+    const chosen = [];
+    for (const opt of select.options) if (opt.selected) chosen.push(opt.value);
+    state.settings.blitz.cards = chosen;
+
+    saveState();
+    toast("Admin settings saved.", "ok");
+    updateUI();
+  }
+
+  // --------- Modals ----------
+
+  // Search modal (v9)
+  function openSearchModal(){
+    el("search-q").value = "";
+    el("search-scope").value = "active";
+    el("search-meta").textContent = "";
+    el("search-results").innerHTML = "";
+    showModal("modal-search");
+  }
+
+  function closeSearchModal(){
+    hideModal("modal-search");
+  }
+
+  function runSearch(){
+    const q = (el("search-q").value||"").trim().toLowerCase();
+    const scope = el("search-scope").value || "active";
+    if(!q){
+      el("search-meta").textContent = "Type a sticker name to search.";
+      el("search-results").innerHTML = "";
+      return;
+    }
+
+    const matches = ALL_STICKERS.filter(s => s.name.toLowerCase().includes(q)).slice(0,200);
+    const rows = [];
+
+    if(scope==="active"){
+      const acc = activeAcc();
+      for(const st of matches){
+        const c = getCount(acc, st.id);
+        rows.push(searchTile(st, c));
+      }
+      el("search-meta").textContent = `${matches.length} matches in active account (${acc.name}). Click tile to jump to its set.`;
+    } else {
+      for(const st of matches){
+        const counts = state.accounts.map(a => ({ name:a.name, c:getCount(a, st.id) }));
+        const any = counts.some(x=>x.c>0);
+        rows.push(searchTileAll(st, counts, any));
+      }
+      el("search-meta").textContent = `${matches.length} matches across all accounts. Click tile to jump to its set.`;
+    }
+
+    el("search-results").innerHTML = rows.join("");
+    el("search-results").querySelectorAll("[data-jump]").forEach(n=>{
+      n.onclick = () => {
+        const setId = n.getAttribute("data-jump");
+        el("set-filter").value = String(setId);
+        navTo("album");
+        closeSearchModal();
+        updateUI();
+        toast("Jumped to set " + setId, "info");
+      };
+    });
+  }
+
+  function searchTile(st, c){
+    const tag = st.gold ? (isStickerBlitzEligible(st) ? "⚡" : "🔒") : "";
+    const cls = (c>0 ? "owned" : "");
+    return `<div class="sticker ${st.gold?"gold":""} ${cls}" style="opacity:1; filter:none;" data-jump="${st.setId}">
+      <div style="font-weight:900; font-size:.78rem; line-height:1.1;">${escapeHtml(st.name)}</div>
+      <div class="mini">Set ${st.setId} | ${st.stars}⭐ ${tag}</div>
+      ${c>0 ? `<div class="count-badge">${c}</div>` : ""}
+    </div>`;
+  }
+
+  function searchTileAll(st, counts, any){
+    const tag = st.gold ? (isStickerBlitzEligible(st) ? "⚡" : "🔒") : "";
+    const cls = any ? "owned" : "";
+    const tiny = counts.map(x=>`${escapeHtml(x.name)}:${x.c}`).join(" | ");
+    return `<div class="sticker ${st.gold?"gold":""} ${cls}" style="opacity:1; filter:none;" data-jump="${st.setId}">
+      <div style="font-weight:900; font-size:.78rem; line-height:1.1;">${escapeHtml(st.name)}</div>
+      <div class="mini">Set ${st.setId} | ${st.stars}⭐ ${tag}</div>
+      <div class="mini" style="margin-top:6px; font-size:.74rem;">${tiny}</div>
+    </div>`;
+  }
+
+  function showModal(id) { el(id).classList.add("show"); }
+  function hideModal(id) { el(id).classList.remove("show"); }
+
+  function openSeasonModal() {
+    const input = el("season-end");
+    const dt = new Date(state.settings.seasonEndTs);
+    input.value = toLocalDateTimeValue(dt);
+    showModal("modal-season");
+  }
+
+  function toLocalDateTimeValue(d) {
+    const pad = (n)=> String(n).padStart(2,"0");
+    const yyyy = d.getFullYear();
+    const mm = pad(d.getMonth()+1);
+    const dd = pad(d.getDate());
+    const hh = pad(d.getHours());
+    const mi = pad(d.getMinutes());
+    return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+  }
+
+  const pickerCtx = { open:false };
+  function openPicker(ctx) {
+    pickerCtx.open = true;
+    Object.assign(pickerCtx, ctx||{});
+    el("picker-title").textContent = ctx.mode === "planRecv" ? "Pick receive sticker" : "Pick send sticker";
+    el("picker-search").value = "";
+    el("picker-only-missing").checked = (ctx.mode === "planSend");
+    buildPickerList();
+    showModal("modal-picker");
+
+    if (ctx.preselectStickerId) {
+      // quick add
+      const st = ALL_STICKERS.find(s=>s.id===ctx.preselectStickerId);
+      if (st) {
+        pickerAdd(st.id);
+      }
+    }
+  }
+
+  function closePicker() {
+    pickerCtx.open = false;
+    hideModal("modal-picker");
+  }
+
+  function buildPickerList() {
+    const q = (el("picker-search").value||"").toLowerCase();
+    const onlyMissing = el("picker-only-missing").checked;
+
+    let sender = state.accounts.find(a=>a.id===Number(pickerCtx.senderId)) || activeAcc();
+    let receiver = state.accounts.find(a=>a.id===Number(pickerCtx.receiverId));
+
+    let items = ALL_STICKERS.filter(st => st.name.toLowerCase().includes(q));
+    if (onlyMissing && receiver) {
+      items = items.filter(st => getCount(receiver, st.id) === 0);
+    }
+
+    // In send mode, only show dupes if sender exists
+    if (pickerCtx.mode === "planSend" && sender) {
+      items = items.filter(st => getCount(sender, st.id) > 1 || getCount(sender, st.id) === 1);
+    }
+
+    el("picker-meta").textContent = `${items.length} matches`;
+
+    el("picker-list").innerHTML = items.slice(0,180).map(st => {
+      const tag = st.gold ? (isStickerBlitzEligible(st) ? "⚡" : "🔒") : "";
+      return `
+        <div class="sticker ${st.gold?"gold":""} ${(getCount(sender,st.id)>0)?"owned":""}" style="opacity:1; filter:none;" data-pick="${st.id}">
+          <div style="font-weight:900; font-size:.78rem; line-height:1.1;">${escapeHtml(st.name)}</div>
+          <div class="mini">${st.stars}⭐ ${st.gold ? "Gold" : ""} ${tag}</div>
+        </div>
+      `;
+    }).join("");
+
+    el("picker-list").querySelectorAll("[data-pick]").forEach(n => {
+      n.onclick = () => pickerAdd(n.getAttribute("data-pick"));
+    });
+  }
+
+  function pickerAdd(stickerId) {
+    const pid = pickerCtx.planId;
+    const plan = pid ? state.plans.find(p=>p.id===pid) : null;
+
+    if (!plan) {
+      // create plan if none provided
+      const senderId = Number(pickerCtx.senderId || activeAcc().id);
+      const receiverId = Number(pickerCtx.receiverId || pickReceiverId(senderId));
+      ensurePlanForCompare(senderId, receiverId, stickerId);
+      closePicker();
+      return;
+    }
+
+    const side = (pickerCtx.mode === "planRecv") ? "receives" : "sends";
+    plan[side] = plan[side] || [];
+    plan[side].push({ stickerId, qty: 1 });
+    saveState();
+    toast("Added to plan.", "ok");
+    closePicker();
+    updateUI();
+  }
+
+  // --------- Account modal ----------
+  function openAccountModal(id=null) {
+    const isNew = (id==null);
+    el("acc-modal-title").textContent = isNew ? "Add account" : "Edit account";
+    el("acc-id").value = isNew ? "" : String(id);
+    const a = isNew ? {name:"",code:"",link:""} : state.accounts.find(x=>x.id===id);
+    el("acc-id").value = (a?.id!=null ? String(a.id) : "");
+    el("acc-name").value = a?.name || "";
+    el("acc-code").value = a?.code || "";
+    el("acc-link").value = a?.link || "";
+    showModal("modal-account");
+  }
+
+  function saveAccountModal() {
+    const idRaw = (el("acc-id") ? el("acc-id").value : "");
+    const name = (el("acc-name").value||"").trim() || "Account";
+    const code = (el("acc-code").value||"").trim();
+    const link = (el("acc-link").value||"").trim();
+
+    if (!idRaw) {
+      const nextId = Math.max(0, ...state.accounts.map(a=>a.id||0)) + 1;
+      state.accounts.push({ id: nextId, name, code, link, prestigeRuns:0, owned:{}, completedAt:null });
+      state.activeAccId = nextId;
+      toast("Account added.", "ok");
+    } else {
+      const id = Number(idRaw);
+      const a = state.accounts.find(x=>x.id===id);
+      if (a) {
+        a.name = name; a.code = code; a.link = link;
+        toast("Account saved.", "ok");
+      }
+    }
+    saveState();
+    hideModal("modal-account");
+    updateUI();
+  }
+
+  
+  
+  // --------- Pets: Showroom + Multi-Equip (v9.30) ----------
+  const DEFAULT_PETS = [
+    {id:1, name:"Dog", emoji:"🐶", anim:"bounce", trigger:"hover", sound:"", intervalSec:12},
+    {id:2, name:"Cat", emoji:"🐱", anim:"wiggle", trigger:"hover", sound:"", intervalSec:12},
+    {id:3, name:"Frog", emoji:"🐸", anim:"hop", trigger:"hover", sound:"", intervalSec:10},
+    {id:4, name:"Fox", emoji:"🦊", anim:"wiggle", trigger:"hover", sound:"", intervalSec:12},
+    {id:5, name:"Bunny", emoji:"🐰", anim:"hop", trigger:"hover", sound:"", intervalSec:10},
+    {id:6, name:"Unicorn", emoji:"🦄", anim:"float", trigger:"hover", sound:"", intervalSec:14},
+    {id:7, name:"Panda", emoji:"🐼", anim:"bounce", trigger:"hover", sound:"", intervalSec:12},
+  ];
+
+  function ensurePets(){
+    if(!Array.isArray(state.pets) || state.pets.length===0){
+      state.pets = DEFAULT_PETS.map(p=>({...p}));
+    } else {
+      // ensure new fields exist
+      state.pets.forEach(p=>{
+        if(typeof p.intervalSec!=="number") p.intervalSec = 12;
+        if(!("sound" in p)) p.sound="";
+        if(!("img" in p)) p.img = p.img || "";
+        if(!("emoji" in p)) p.emoji = p.emoji || "🐾";
+        if(!("anim" in p)) p.anim="none";
+        if(!("trigger" in p)) p.trigger="hover";
+      });
+    }
+  }
+
+  function getPetById(id){ ensurePets(); return state.pets.find(p=>p.id===id) || null; }
+
+  // --- Account pet prefs (migrates older single-equip saves) ---
+  function equippedPetIds(acc){
+    if(Array.isArray(acc.equippedPetIds)) return acc.equippedPetIds;
+    if(typeof acc.equippedPetId==="number" && acc.equippedPetId>0) {
+      acc.equippedPetIds = [acc.equippedPetId];
+      delete acc.equippedPetId;
+      return acc.equippedPetIds;
+    }
+    acc.equippedPetIds = [];
+    return acc.equippedPetIds;
+  }
+  function petEquipSize(acc){
+    const v = Number(acc.petEquipSize);
+    return Number.isFinite(v) && v>=24 && v<=96 ? v : 48;
+  }
+  function isEquipped(acc, petId){ return equippedPetIds(acc).includes(petId); }
+
+  function playPetSound(pet){
+    if(!pet || !pet.sound) return;
+    try{ const a=new Audio(pet.sound); a.volume=.55; a.play().catch(()=>{});}catch(e){}
+  }
+  function spriteHTML(pet){
+    return pet?.img
+      ? `<img src="${pet.img}" alt="${escapeAttr(pet.name)}">`
+      : `<span>${escapeHtml(pet?.emoji || "🐾")}</span>`;
+  }
+
+  function setEquippedPetIds(acc, ids){
+    acc.equippedPetIds = Array.from(new Set((ids||[]).map(x=>Number(x)).filter(x=>Number.isFinite(x) && x>0)));
+    saveState();
+    renderHeaderPet();
+    renderPetShowroom();
+  }
+
+  function equipPet(acc, petId){
+    ensurePets();
+    const pet = getPetById(petId);
+    if(!pet){ toast("Pet not found.", "error"); return; }
+    const ids = equippedPetIds(acc);
+    if(ids.includes(petId)) { toast("Already equipped.", "info"); return; }
+    if(ids.length>=8){ toast("Max 8 equipped in header.", "warn"); return; }
+    ids.push(petId);
+    setEquippedPetIds(acc, ids);
+    toast(`Equipped: ${pet.name}`, "success");
+  }
+
+  function unequipPet(acc, petId){
+    const ids = equippedPetIds(acc).filter(x=>x!==petId);
+    setEquippedPetIds(acc, ids);
+    toast("Unequipped.", "info");
+  }
+
+  // --- Header rendering: row of pets (click -> pet panel) ---
+  let petTimerHandles = new Map(); // petId -> interval handle (active acc only)
+
+  function clearPetTimers(){
+    for(const h of petTimerHandles.values()) clearInterval(h);
+    petTimerHandles.clear();
+  }
+
+  function renderHeaderPet(){
+    ensurePets();
+    const acc = activeAcc();
+    const ids = equippedPetIds(acc);
+    const slot = el("header-pet-slot");
+    if(!slot) return;
+
+    clearPetTimers();
+
+    const size = petEquipSize(acc);
+    slot.innerHTML = "";
+    slot.className = "header-pet-row";
+
+    if(ids.length===0){
+      slot.innerHTML = `<span class="header-pet-empty">🐾</span>`;
+      slot.onclick = ()=> navTo("pet");
+      return;
+    }
+
+    ids.slice(0,8).forEach((id)=>{
+      const pet = getPetById(id);
+      if(!pet) return;
+
+      const wrap = document.createElement("div");
+      wrap.className = "header-pet";
+      wrap.setAttribute("data-pet", String(id));
+      wrap.style.width = size+"px";
+      wrap.style.height = size+"px";
+      wrap.innerHTML = spriteHTML(pet);
+
+      // normalize inner sprite sizing
+      const img = wrap.querySelector("img");
+      const span = wrap.querySelector("span");
+      if(img){
+        img.style.width = size+"px";
+        img.style.height = size+"px";
+      }
+      if(span){
+        span.style.fontSize = Math.round(size*0.88) + "px";
+        span.style.lineHeight = "1";
+      }
+
+      // Hover animation + sound
+      wrap.onmouseenter = ()=>{
+        const sprite = wrap.firstElementChild;
+        if(!sprite) return;
+        if(pet.trigger==="hover" && pet.anim && pet.anim!=="none") sprite.classList.add("pet-anim-"+pet.anim);
+        if(pet.trigger==="hover") playPetSound(pet);
+      };
+      wrap.onmouseleave = ()=>{
+        const sprite = wrap.firstElementChild;
+        if(sprite && pet.trigger==="hover") sprite.className = "";
+      };
+
+      // Click: quick menu (swap/unequip) or go to showroom
+      wrap.onclick = (ev)=>{
+        ev.stopPropagation();
+        openPetQuickMenu(id, ev.clientX, ev.clientY);
+      };
+
+      slot.appendChild(wrap);
+
+      // Timer trigger: pulse animation every intervalSec
+      if(pet.trigger==="timer" && pet.anim && pet.anim!=="none"){
+        const sec = Math.max(2, Number(pet.intervalSec)||12);
+        const handle = setInterval(()=>{
+          const node = slot.querySelector(`.header-pet[data-pet="${id}"]`);
+          const sprite = node?.firstElementChild;
+          if(!sprite) return;
+          sprite.classList.remove("pet-anim-"+pet.anim);
+          // retrigger
+          void sprite.offsetWidth;
+          sprite.classList.add("pet-anim-"+pet.anim);
+          playPetSound(pet);
+          setTimeout(()=>{ sprite.classList.remove("pet-anim-"+pet.anim); }, 1200);
+        }, sec*1000);
+        petTimerHandles.set(id, handle);
+      }
+
+      // Always trigger: keep animation on
+      if(pet.trigger==="always" && pet.anim && pet.anim!=="none"){
+        const sprite = wrap.firstElementChild;
+        if(sprite) sprite.classList.add("pet-anim-"+pet.anim);
+      }
+    });
+
+    // clicking empty space -> pet panel
+    slot.onclick = ()=> navTo("pet");
+  }
+
+  // Small quick menu for equipped pets
+  function openPetQuickMenu(petId, x, y){
+    const pet = getPetById(petId);
+    const acc = activeAcc();
+    const menuId = "pet-quick-menu";
+    let m = el(menuId);
+    if(!m){
+      m = document.createElement("div");
+      m.id = menuId;
+      m.style.position="fixed";
+      m.style.zIndex="9999";
+      m.style.background="#fff";
+      m.style.border="3px solid #000";
+      m.style.borderRadius="14px";
+      m.style.padding="10px";
+      m.style.boxShadow="0 14px 30px rgba(0,0,0,.25)";
+      m.style.minWidth="210px";
+      m.innerHTML = "";
+      document.body.appendChild(m);
+
+      // close on click outside
+      document.addEventListener("click", (ev)=>{
+        const mm = el(menuId);
+        if(!mm) return;
+        if(ev.target===mm || mm.contains(ev.target)) return;
+        mm.remove();
+      }, {capture:true});
+    }
+
+    const safeX = Math.min(window.innerWidth-240, Math.max(10, x-10));
+    const safeY = Math.min(window.innerHeight-140, Math.max(10, y-10));
+    m.style.left = safeX+"px";
+    m.style.top = safeY+"px";
+
+    m.innerHTML = `
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:42px; height:42px; display:flex; align-items:center; justify-content:center;">
+            ${pet ? spriteHTML(pet) : "🐾"}
+          </div>
+          <div>
+            <div style="font-weight:900;">${escapeHtml(pet?.name || "Pet")}</div>
+            <div class="mini">Equipped</div>
+          </div>
+        </div>
+        <button class="btn" id="pq-close">✖</button>
+      </div>
+      <div class="hr"></div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn btn-orange" id="pq-swap">Showroom</button>
+        <button class="btn btn-red" id="pq-unequip">Unequip</button>
+      </div>
+    `;
+    el("pq-close").onclick = ()=> m.remove();
+    el("pq-swap").onclick = ()=>{ m.remove(); navTo("pet"); };
+    el("pq-unequip").onclick = ()=>{ m.remove(); unequipPet(acc, petId); };
+  }
+
+  // --- Showroom rendering (all pets, toggle equip) ---
+  function renderPetShowroom(){
+    ensurePets();
+    const acc = activeAcc();
+    const eq = equippedPetIds(acc);
+    const shelf = el("pet-showroom-area");
+    if(!shelf) return;
+
+    shelf.innerHTML = state.pets.map(p=>{
+      const equipped = eq.includes(p.id);
+      return `<div class="pet-card ${equipped?'pet-equipped':''}" data-pet="${p.id}">
+        <div class="pet-top">
+          <div>
+            <strong>${escapeHtml(p.name)}</strong>
+            <div class="mini">Trigger: ${escapeHtml(p.trigger||"hover")}${p.trigger==="timer" ? ` • ${Number(p.intervalSec)||12}s` : ""}</div>
+          </div>
+          ${equipped ? `<span class="badge" title="Equipped">EQUIPPED</span>` : ``}
+        </div>
+        <div class="pet-plot"><div class="pet-sprite" id="pet-sprite-${p.id}">${spriteHTML(p)}</div></div>
+        <div class="pet-actions">
+          ${equipped
+            ? `<button class="btn btn-red" data-unequip="${p.id}">UNEQUIP</button>`
+            : `<button class="btn btn-green" data-equip="${p.id}">EQUIP</button>`
+          }
+          <div style="display:flex; gap:6px; flex:1;">
+            <button class="btn btn-orange" style="flex:1;" data-editpet="${p.id}">EDIT</button>
+            <button class="btn btn-red" style="flex:1;" data-delpet="${p.id}">DEL</button>
+          </div>
+        </div>
+      </div>`;
+    }).join("");
+
+    shelf.querySelectorAll("[data-equip]").forEach(b=> b.onclick=()=>{
+      const id=Number(b.getAttribute("data-equip"));
+      equipPet(acc, id);
+    });
+    shelf.querySelectorAll("[data-unequip]").forEach(b=> b.onclick=()=>{
+      const id=Number(b.getAttribute("data-unequip"));
+      unequipPet(acc, id);
+    });
+    shelf.querySelectorAll("[data-editpet]").forEach(b=> b.onclick=()=> openPetModal(Number(b.getAttribute("data-editpet"))) );
+    shelf.querySelectorAll("[data-delpet]").forEach(b=> b.onclick=()=>{
+      const id=Number(b.getAttribute("data-delpet"));
+      if(!confirm("Delete this pet?")) return;
+      const idx=state.pets.findIndex(x=>x.id===id);
+      if(idx>=0) state.pets.splice(idx,1);
+      // remove from equipped lists on all accounts
+      state.accounts.forEach(a=>{
+        const ids = equippedPetIds(a).filter(x=>x!==id);
+        a.equippedPetIds = ids;
+      });
+      saveState(); renderHeaderPet(); renderPetShowroom();
+    });
+
+    // Hover effects on cards (showroom-style)
+    shelf.querySelectorAll(".pet-card").forEach(card=>{
+      const id=Number(card.getAttribute("data-pet"));
+      const pet=getPetById(id);
+      const sprite=el("pet-sprite-"+id);
+      if(!pet || !sprite) return;
+
+      if(pet.trigger==="always" && pet.anim && pet.anim!=="none"){
+        if(sprite.firstElementChild) sprite.firstElementChild.classList.add("pet-anim-"+pet.anim);
+      }
+
+      card.onmouseenter=()=>{
+        if(pet.trigger==="hover" && pet.anim && pet.anim!=="none"){
+          if(sprite.firstElementChild) sprite.firstElementChild.classList.add("pet-anim-"+pet.anim);
+        }
+        if(pet.trigger==="hover") playPetSound(pet);
+      };
+      card.onmouseleave=()=>{
+        if(pet.trigger==="hover" && sprite.firstElementChild) sprite.firstElementChild.className="";
+      };
+    });
+  }
+
+  function syncPetModalTriggerUI(){
+    const trig = el("pet-new-trigger")?.value || "hover";
+    const row = el("pet-trigger-interval-row");
+    if(row) row.style.display = (trig==="timer") ? "block" : "none";
+  }
+
+  function openPetModal(editId=null){
+    ensurePets();
+    const pet = editId ? getPetById(editId) : null;
+    el("pet-new-name").value = pet?.name || "";
+    el("pet-new-emoji").value = (pet && !pet.img) ? (pet.emoji||"") : "";
+    el("pet-new-url").value = (pet && pet.img && !String(pet.img).startsWith("data:")) ? (pet.img||"") : "";
+    el("pet-new-sound").value = pet?.sound || "";
+    el("pet-new-anim").value = pet?.anim || "none";
+    el("pet-new-trigger").value = pet?.trigger || "hover";
+    el("pet-new-interval").value = Number(pet?.intervalSec)||12;
+    el("pet-new-file").value = "";
+
+    el("modal-pet").setAttribute("data-edit-id", editId ? String(editId) : "");
+    syncPetModalTriggerUI();
+    showModal("modal-pet");
+
+    if(el("pet-new-trigger")) el("pet-new-trigger").onchange = syncPetModalTriggerUI;
+  }
+
+  // Pet modal save helper (supports intervalSec)
+  // (button binding is in bind())
+  async function savePetFromModal(){
+    ensurePets();
+    const editIdRaw = el("modal-pet").getAttribute("data-edit-id") || "";
+    const editId = editIdRaw ? Number(editIdRaw) : null;
+
+    const name = el("pet-new-name").value.trim() || "Pet";
+    const emoji = el("pet-new-emoji").value.trim();
+    const url = el("pet-new-url").value.trim();
+    const sound = el("pet-new-sound").value.trim();
+    const anim = el("pet-new-anim").value;
+    const trigger = el("pet-new-trigger").value;
+    const intervalSec = Math.max(2, Number(el("pet-new-interval").value || 12));
+
+    let imgData = "";
+    const f = el("pet-new-file").files && el("pet-new-file").files[0];
+
+    if(f){
+      try { imgData = await fileToResizedDataURL(f, 128); }
+      catch(e){ toast("Error processing image file", "error"); return; }
+    } else if(url){
+      imgData = url;
+    }
+
+    // Validation: must have at least emoji or img, unless editing existing and keeping prior
+    if(!emoji && !imgData && !editId){
+      toast("Please add an emoji OR an image.", "warn");
+      return;
+    }
+
+    if(editId){
+      const p = state.pets.find(x=>x.id===editId);
+      if(p){
+        p.name = name;
+        if(imgData) { p.img = imgData; p.emoji = ""; }
+        else if(emoji) { p.emoji = emoji; p.img = ""; }
+        p.sound = sound;
+        p.anim = anim;
+        p.trigger = trigger;
+        p.intervalSec = intervalSec;
+      }
+    } else {
+      const nextId = Math.max(0, ...state.pets.map(x=>x.id||0)) + 1;
+      state.pets.push({
+        id: nextId,
+        name,
+        emoji: imgData ? "" : (emoji || "🐾"),
+        img: imgData || "",
+        sound,
+        anim,
+        trigger,
+        intervalSec
+      });
+    }
+
+    saveState();
+    hideModal("modal-pet");
+    renderHeaderPet();
+    renderPetShowroom();
+    toast("Pet saved.", "success");
+  }
+
+
+  function escapeAttr(s) {
+    return String(s).replaceAll('"',"&quot;");
+  }
+  function csv(s) {
+    const v = String(s).replaceAll('"','""');
+    return `"${v}"`;
+  }
+  
+  function escapeHtml(s) {
+    return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  }
+
+  // --------- Wiring ----------
+  function updateUI() {
+    // sync toggles
+    el("prestige-toggle").checked = !!state.settings.prestigeFilter;
+    state.settings.prestigeFilter = !!el("prestige-toggle").checked;
+
+    renderHeader();
+    renderHeaderPet(); // Make sure header pet renders on update
+    renderAlbum();
+    renderProgress();
+    renderPlans();
+    renderCompare();
+    renderVault();
+    renderShowcase();
+    renderTrends();
+    renderAdmin();
+  }
+
+  function tick() {
+    ensureWindow();
+    renderHeader();
+  }
+
+  function clearActiveAlbum() {
+    const acc = activeAcc();
+    acc.owned = {};
+    saveState();
+    toast("Active album cleared.", "ok");
+    updateUI();
+  }
+
+  function factoryReset() {
+    localStorage.removeItem(LS_KEY);
+    state = initLedger(defaultState());
+    saveState();
+    toast("Reset complete.", "info");
+    updateUI();
+  }
+
+  function newSendWindowNow() {
+    // Force new window by making windowId unique, stored as override with timestamp
+    // Simpler: clear current window counts
+    const wid = ensureWindow();
+    state.sendLedger.windows[wid] = { regular: {}, blitz: {}, external: { regular:0, blitz:0 } };
+    saveState();
+    toast("Send window reset for today.", "info");
+    updateUI();
+  }
+
+  // Buttons
+  function bind() {
+    mountNav();
+    rebuildAccountSelects();
+    rebuildSetFilter();
+
+    el("album-view-mode").onchange = updateUI;
+    el("album-q").oninput = () => updateUI();
+    el("album-sort").onchange = updateUI;
+    el("album-compact").onchange = updateUI;
+
+    el("pill-season").onclick = openSeasonModal;
+    el("btn-save-season").onclick = () => {
+      const v = el("season-end").value;
+      const ts = v ? new Date(v).getTime() : NaN;
+      if (!Number.isFinite(ts)) {
+        toast("Invalid season end time.", "error");
+        return;
+      }
+      state.settings.seasonEndTs = ts;
+      saveState();
+      hideModal("modal-season");
+      toast("Season timer updated.", "ok");
+      updateUI();
+    };
+    el("btn-close-season").onclick = () => hideModal("modal-season");
+
+    el("btn-clear-active").onclick = clearActiveAlbum;
+    el("btn-export-active").onclick = exportActiveCSV;
+    el("btn-export-all").onclick = exportAllJSON;
+    el("btn-open-search").onclick = openSearchModal;
+
+    el("prestige-toggle").onchange = () => {
+      state.settings.prestigeFilter = !!el("prestige-toggle").checked;
+      saveState(); updateUI();
+    };
+
+    el("btn-new-plan").onclick = newPlan;
+    el("btn-clear-plans").onclick = () => { state.plans=[]; saveState(); toast("Plans cleared.", "info"); updateUI(); };
+    el("btn-export-plans").onclick = exportPlansJSON;
+
+    el("btn-make-plan-from-compare").onclick = () => {
+      const senderId = Number(el("comp-left").value);
+      const receiverId = Number(el("comp-right").value);
+      let plan = state.plans.find(p=>p.senderId===senderId && p.receiverId===receiverId);
+      if (!plan) {
+        const id = `p_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+        plan = { id, title:"Compare plan", senderId, receiverId, sends:[], receives:[], createdTs: Date.now() };
+        state.plans.unshift(plan);
+        saveState();
+      }
+      navTo("plan");
+    };
+
+    document.querySelectorAll("[data-vault]").forEach(b => {
+      b.onclick = () => openVault(Number(b.getAttribute("data-vault")));
+    });
+    el("btn-complete-album").onclick = completeAlbum;
+    el("btn-undo-complete").onclick = undoCompletion;
+
+    el("btn-run-smart").onclick = renderSmart;
+
+    el("btn-showcase-auto").onclick = () => {
+      state.showcase.mode = "auto";
+      saveState();
+      toast("Showcase set to auto.", "ok");
+      updateUI();
+    };
+    el("btn-showcase-manual").onclick = () => {
+      state.showcase.mode = "manual";
+      state.showcase.have = [];
+      state.showcase.need = [];
+      saveState();
+      toast("Showcase cleared for manual.", "info");
+      updateUI();
+    };
+    el("btn-showcase-copy").onclick = copyShowcaseText;
+
+    el("showcase-pill").onclick = () => {
+      state.showcase.mode = (state.showcase.mode === "manual") ? "auto" : "manual";
+      saveState();
+      updateUI();
+      toast(`Showcase mode: ${state.showcase.mode}`, "info");
+    };
+
+    el("btn-showcase-add-have").onclick = () => showcaseAdd("have");
+    el("btn-showcase-add-need").onclick = () => showcaseAdd("need");
+
+    el("btn-snapshot").onclick = takeSnapshot;
+    el("btn-clear-snapshots").onclick = () => {
+      state.trends.snapshots = [];
+      saveState();
+      toast("Snapshots cleared.", "info");
+      renderTrends();
+    };
+    el("btn-export-snapshots").onclick = exportSnapshotsJSON;
+
+    el("btn-import-apply").onclick = applyImport;
+    el("btn-import-clear").onclick = () => { el("import-text").value=""; };
+    el("btn-export-album-csv").onclick = exportAlbumMasterCSV;
+    el("btn-export-active-json").onclick = exportActiveJSON;
+
+    el("btn-add-account").onclick = () => openAccountModal(null);
+    el("btn-reset-app").onclick = factoryReset;
+    el("btn-reset-window").onclick = newSendWindowNow;
+
+    el("btn-save-account").onclick = saveAccountModal;
+    el("btn-close-account").onclick = () => hideModal("modal-account");
+
+    el("blitz-active").onchange = applyAdminSettings;
+    el("fest-active").onchange = applyAdminSettings;
+    el("cap-normal").onchange = applyAdminSettings;
+    el("cap-fest").onchange = applyAdminSettings;
+    el("cap-blitz").onchange = applyAdminSettings;
+    el("opt-budget").onchange = applyAdminSettings;
+    el("vault-protect-gold").onchange = applyAdminSettings;
+    el("blitz-cards").onchange = applyAdminSettings;
+
+    el("picker-search").oninput = buildPickerList;
+    el("picker-only-missing").onchange = buildPickerList;
+    el("btn-close-picker").onclick = closePicker;
+
+    el("btn-close-search").onclick = closeSearchModal;
+    el("btn-search-run").onclick = runSearch;
+    
+    el("search-q").onkeydown = (e)=>{ if(e.key==="Enter"){ e.preventDefault(); runSearch(); } };
+
+    // close modal on backdrop click
+    ["modal-season","modal-account","modal-picker","modal-search"].forEach(id => {
+      el(id).addEventListener("click", (ev)=>{ if(ev.target===el(id)) hideModal(id); });
+    });
+
+    // keep header synced every second
+    setInterval(tick, 1000);
+  
+    // Pet showroom bindings
+    if(el("btn-pet-add")) el("btn-pet-add").onclick = ()=> openPetModal(null);
+    if(el("btn-pet-reset")) el("btn-pet-reset").onclick = ()=>{
+      if(confirm("Reset pets to defaults? This will remove custom pets.")){
+        state.pets = DEFAULT_PETS.map(p=>({...p}));
+        state.accounts.forEach(a=>{ if(a.equippedPetId && !state.pets.some(p=>p.id===a.equippedPetId)) a.equippedPetId=0; });
+        saveState(); renderHeaderPet(); renderPetShowroom();
+      }
+    };
+    if(el("btn-close-pet")) el("btn-close-pet").onclick = ()=> hideModal("modal-pet");
+    if(el("btn-pet-cancel")) el("btn-pet-cancel").onclick = ()=> hideModal("modal-pet");
+
+    // SAVE PET HANDLER (FIXED)
+    if(el("btn-pet-save")) el("btn-pet-save").onclick = ()=>{ savePetFromModal(); };
+    if(el("pet-new-trigger")) el("pet-new-trigger").onchange = syncPetModalTriggerUI;
+}
+
+  // Start
+  bind();
+  rebuildAccountSelects();
+  rebuildSetFilter();
+  updateUI();
+
+})();
+</script>
+
+</body>
+</html>
