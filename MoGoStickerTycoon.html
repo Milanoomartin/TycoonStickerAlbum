@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoGo Sticker Tycoon: Posh Pets</title>
+    <style>
+        :root {
+            --brand-red: #EC1C24;
+            --brand-blue: #0072BC;
+            --brand-green: #00A651;
+            --brand-yellow: #FFF200;
+            --brand-bg: #E0F7FA;
+            --vault-orange: #F57C00;
+            --vault-blue: #1976D2;
+            --vault-yellow: #FBC02D;
+            --gold: linear-gradient(135deg, #FFD700 0%, #FDB931 50%, #FFD700 100%);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--brand-bg);
+            background-image: radial-gradient(#B2EBF2 15%, transparent 16%), radial-gradient(#B2EBF2 15%, transparent 16%);
+            background-size: 60px 60px;
+            margin: 0; padding: 0 0 100px 0; color: #333;
+            overflow-x: hidden;
+        }
+
+        /* --- Header & Timer --- */
+        .top-banner {
+            background: #222; color: white; padding: 12px; text-align: center;
+            font-weight: bold; font-size: 1.1rem; display: flex; justify-content: center; gap: 20px; align-items: center;
+            box-shadow: 0 4px 5px rgba(0,0,0,0.2); position: relative; z-index: 10;
+        }
+        .blitz-active { animation: pulse-gold 2s infinite; color: #FFD700; text-shadow: 0 0 10px #FFD700; }
+        .fest-active { animation: pulse-green 2s infinite; color: #00FF00; text-shadow: 0 0 10px #00FF00; }
+        .edit-icon { cursor: pointer; font-size: 0.9rem; margin-left: 5px; color: #aaa; transition:0.2s; }
+        .edit-icon:hover { color: white; transform: scale(1.2); }
+
+        .main-header {
+            background: white; border-bottom: 6px solid #333; padding: 25px; text-align: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-bottom: 20px; position: relative;
+        }
+        
+        h1 { margin: 0; color: var(--brand-red); font-size: 3rem; -webkit-text-stroke: 2px black; letter-spacing: 2px; }
+        .acc-info-display { font-size: 0.9rem; color: #555; margin-top: 5px; }
+        .acc-info-display a { color: var(--brand-blue); text-decoration: underline; font-weight: bold; }
+
+        /* --- Navigation --- */
+        .nav-bar { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 25px; padding: 0 15px; }
+        .btn {
+            padding: 10px 18px; border: 3px solid #333; border-radius: 12px; cursor: pointer;
+            font-weight: 800; text-transform: uppercase; background: white; border-bottom-width: 6px;
+            transition: all 0.1s; font-size: 0.85rem; position: relative;
+        }
+        .btn:active { transform: translateY(4px); border-bottom-width: 2px; }
+        .btn.active { background: #333; color: white; border-color: black; }
+        .btn-green { background: var(--brand-green); color: white; border-color: #006837; }
+        .btn-blue { background: var(--brand-blue); color: white; border-color: #004c8c; }
+        .btn-orange { background: var(--brand-yellow); color: #333; border-color: #ccac00; }
+
+        .nav-bubble {
+            position: absolute; top: -10px; right: -10px; background: var(--brand-red); color: white;
+            border-radius: 50%; width: 24px; height: 24px; display: none; align-items: center; justify-content: center;
+            font-size: 12px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); animation: bounce 1s infinite;
+        }
+
+        /* --- Panels --- */
+        .panel { display: none; padding: 20px; max-width: 1600px; margin: 0 auto; }
+        .panel.active { display: block; animation: slideUp 0.4s ease-out; }
+
+        /* --- Stickers --- */
+        .set-card { background: white; border: 3px solid #333; border-radius: 16px; margin-bottom: 30px; overflow: hidden; box-shadow: 5px 5px 0 rgba(0,0,0,0.1); }
+        .set-header { background: #333; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
+        .sticker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; padding: 15px; background: #F9F9F9; }
+        
+        .sticker {
+            aspect-ratio: 3/4; border: 2px solid #ccc; border-radius: 10px; position: relative;
+            background: #e0e0e0; cursor: pointer; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; text-align: center; font-size: 0.8rem;
+            padding: 4px; transition: 0.2s; user-select: none; opacity: 0.6; filter: grayscale(100%);
+        }
+        .sticker:hover { transform: translateY(-5px); z-index: 10; opacity: 1; filter: grayscale(0%); }
+        .sticker.owned { border-width: 3px; box-shadow: 0 5px 0 rgba(0,0,0,0.15); background: white; opacity: 1; filter: grayscale(0%); }
+        
+        /* Rarity Styles */
+        .sticker.gold { border-color: #B8860B; background: #cfb53b; }
+        .sticker.gold.owned { background: var(--gold); border-color: #B8860B; animation: shine 3s infinite linear; }
+        .sticker.owned[data-stars="1"] { background: #eef7ee; border-color: #A6A6A6; }
+        .sticker.owned[data-stars="2"] { background: #fff8e1; border-color: #F6B26B; }
+        .sticker.owned[data-stars="3"] { background: #fbe9e7; border-color: #EA9999; }
+        .sticker.owned[data-stars="4"] { background: #e3f2fd; border-color: #3D85C6; }
+        .sticker.owned[data-stars="5"] { background: #f3e5f5; border-color: #8E7CC3; }
+
+        .count-badge {
+            position: absolute; top: -8px; right: -8px; background: var(--brand-red); color: white;
+            border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: bold; border: 2px solid white; z-index: 5; box-shadow: 0 2px 2px rgba(0,0,0,0.3);
+        }
+        
+        .action-row {
+            position: absolute; bottom: -10px; width: 100%; display: flex; justify-content: center; gap: 5px;
+            opacity: 0; transition: 0.2s;
+        }
+        .sticker.owned:hover .action-row, .sticker:hover .action-row { opacity: 1; bottom: -12px; }
+        
+        .icon-btn {
+            width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; border: 2px solid white; cursor: pointer; color: white; font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3); transition: transform 0.1s;
+        }
+        .icon-btn:hover { transform: scale(1.1); }
+        .btn-plus { background: var(--brand-blue); }
+        .btn-arrow { background: var(--brand-green); }
+
+        /* --- Progress & Prizes --- */
+        .progress-section { background: white; padding: 20px; border-radius: 15px; border: 3px solid #333; margin-bottom: 20px; position: relative; }
+        .p-bar-container { background: #eee; border-radius: 10px; height: 24px; overflow: hidden; margin-bottom: 10px; border: 2px solid #333; position: relative; }
+        .p-fill { height: 100%; background: var(--brand-green); width: 0%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: bold; text-shadow: 1px 1px 0 #000; }
+        .p-label { font-size: 0.9rem; font-weight: bold; display: flex; justify-content: space-between; margin-bottom: 4px; }
+        
+        /* --- Trade Planner --- */
+        .plan-card { background: white; border: 3px solid #333; border-radius: 15px; padding: 15px; margin-bottom: 20px; position: relative; box-shadow: 5px 5px 0 rgba(0,0,0,0.05); }
+        .plan-grid { display: grid; grid-template-columns: 1fr 50px 1fr; gap: 15px; align-items: start; }
+        .plan-col { background: #f8f8f8; border: 2px dashed #ccc; border-radius: 10px; padding: 10px; min-height: 150px; }
+        .slot {
+            background: white; border: 1px solid #999; border-radius: 8px; padding: 8px; margin-bottom: 8px;
+            display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; box-shadow: 0 2px 0 #ccc;
+        }
+        .slot-empty {
+            background: rgba(0, 166, 81, 0.05); border: 2px dashed var(--brand-green); color: var(--brand-green);
+            justify-content: center; cursor: pointer; font-weight: bold; font-size: 1.5rem; transition: 0.2s;
+        }
+        .slot-empty:hover { background: rgba(0, 166, 81, 0.15); transform: scale(1.02); }
+
+        /* --- Showcase & Screenshot --- */
+        .showcase-container { background: white; padding: 30px; border-radius: 20px; border: 5px solid #333; max-width: 900px; margin: 0 auto; }
+        .screenshot-mode .nav-bar, .screenshot-mode .top-banner, .screenshot-mode .admin-section, .screenshot-mode .main-header { display: none !important; }
+        .screenshot-mode body { background: white; padding: 20px; }
+        .screenshot-mode .showcase-container { box-shadow: none; border: 5px solid black; }
+
+        /* --- Drag & Drop --- */
+        .sticker-drag { cursor: grab; }
+        .sticker-drag:active { cursor: grabbing; }
+        .drop-zone { transition: 0.2s; }
+        .drop-zone.drag-over { background: rgba(0, 166, 81, 0.1); border-color: var(--brand-green); transform: scale(1.01); }
+
+        /* --- Toasts (Notifications) --- */
+        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast {
+            background: white; border-left: 6px solid var(--brand-green); padding: 15px 20px; border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); animation: slideIn 0.3s ease-out; font-weight: bold; min-width: 250px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .toast.error { border-color: var(--brand-red); }
+        .toast.info { border-color: var(--brand-blue); }
+
+        /* --- Confetti --- */
+        #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
+
+        /* --- Admin & General --- */
+        .admin-section { background: white; border: 3px solid #333; padding: 20px; border-radius: 15px; margin-bottom: 20px; }
+        input, select, textarea { padding: 10px; border: 2px solid #ccc; border-radius: 8px; width: 100%; box-sizing: border-box; margin-bottom: 10px; font-family: inherit; }
+        
+        /* Modal */
+        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; }
+        .modal-box { background:white; width:90%; max-width:600px; margin:50px auto; padding:25px; border-radius:15px; border:4px solid #333; position: relative; max-height: 80vh; overflow-y: auto; }
+        .prompt-text { background:#f4f4f4; padding:15px; border:1px dashed #666; font-family: monospace; white-space: pre-wrap; font-size: 0.85rem; margin: 10px 0; }
+
+        @keyframes slideUp { from {opacity:0; transform:translateY(20px);} to {opacity:1; transform:translateY(0);} }
+        @keyframes slideIn { from {opacity:0; transform:translateX(100%);} to {opacity:1; transform:translateX(0);} }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        @keyframes shine { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes pulse-green { 0% { text-shadow: 0 0 5px lime; } 50% { text-shadow: 0 0 20px lime; } 100% { text-shadow: 0 0 5px lime; } }
+        @keyframes pulse-gold { 0% { text-shadow: 0 0 5px gold; } 50% { text-shadow: 0 0 20px gold; } 100% { text-shadow: 0 0 5px gold; } }
+    </style>
+</head>
+<body>
+
+<canvas id="confetti-canvas"></canvas>
+<div id="toast-container"></div>
+
+<div class="top-banner">
+    <span id="countdown-timer">⏳ Season Ends: ...</span> <span class="edit-icon" onclick="editEndDate()" title="Edit Timer">✏️</span>
+    <span id="blitz-status" style="display:none; margin-left:20px;">⚡ GOLD BLITZ ACTIVE</span>
+    <span id="fest-status" style="display:none; margin-left:20px;">🎉 TRADE FEST ACTIVE (10 Sends)</span>
+</div>
+
+<div class="main-header">
+    <h1>🎩 MoGo Sticker Tycoon: Posh Pets 🐾</h1>
+    <div style="max-width: 600px; margin: 10px auto;">
+        <label>Active Tycoon:</label>
+        <select id="active-account" onchange="switchAccount()" style="padding: 5px; font-weight:bold; cursor:pointer;"></select>
+        <div class="acc-info-display" id="header-acc-info"></div>
+    </div>
+</div>
+
+<div class="nav-bar">
+    <button class="btn active" onclick="navTo('album')">📖 Album</button>
+    <button class="btn btn-green" onclick="navTo('progress')">📊 Progress</button>
+    <button class="btn btn-blue" onclick="navTo('plan')">📝 Trade Plan</button>
+    <button class="btn" onclick="navTo('compare')">🆚 Compare</button>
+    <button class="btn btn-orange" onclick="navTo('rewards')">🎁 Vault <div id="vault-bubble" class="nav-bubble">1</div></button>
+    <button class="btn" onclick="navTo('smart')">🤖 Smart Trades</button>
+    <button class="btn" onclick="navTo('showcase')">📸 Showcase</button>
+    <button class="btn" onclick="navTo('import')">📥 Import</button>
+    <button class="btn" onclick="navTo('admin')">🔒 Admin</button>
+</div>
+
+<div id="panel-album" class="panel active">
+    <div class="admin-section" style="display:flex; justify-content: space-between; align-items: center; padding: 15px;">
+        <div style="display:flex; gap:10px; align-items:center;">
+            <select id="set-filter" onchange="renderAlbum()" style="width: auto; margin:0;">
+                <option value="all">Full Album Scroll</option>
+            </select>
+            <label style="cursor:pointer; font-weight:bold;"><input type="checkbox" id="prestige-check" onchange="togglePrestige()"> Prestige Mode 🏆</label>
+        </div>
+        <button class="btn" style="background:#eee;" onclick="clearCurrentAlbum()">🗑️ Clear</button>
+    </div>
+    <div id="album-container"></div>
+</div>
+
+<div id="panel-progress" class="panel">
+    <div class="admin-section">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3>📊 Progress & Rewards</h3>
+            <button class="btn" onclick="showModal('edit-prizes-modal')">⚙️ Edit Prizes</button>
+        </div>
+        <p>Estimated rewards based on completion.</p>
+    </div>
+    <div id="progress-container"></div>
+</div>
+
+<div id="panel-plan" class="panel">
+    <div class="admin-section">
+        <h3>📝 Trade Planning Board</h3>
+        <p>Stage trades here. <strong>Execute actual trades in the game app!</strong></p>
+        <button class="btn btn-green" onclick="openNewPlanModal()">+ New Plan Group</button>
+    </div>
+    <div id="plans-list"></div>
+</div>
+
+<div id="panel-compare" class="panel">
+    <div class="admin-section">
+        <h3>🆚 Side-by-Side View (Drag & Drop)</h3>
+        <p>Drag a sticker from one side to the other to create a plan!</p>
+        <div style="display:flex; gap:10px;">
+            <select id="comp-left" onchange="renderCompare()" style="flex:1"></select>
+            <select id="comp-right" onchange="renderCompare()" style="flex:1"></select>
+        </div>
+        <div style="margin-top:10px; text-align:center;">
+            <button class="btn" onclick="toggleScreenshotMode()">📷 Screenshot Mode</button>
+        </div>
+    </div>
+    <div style="display:flex; gap:20px; overflow-x:auto;">
+        <div id="comp-view-left" class="drop-zone" style="flex:1; min-width:300px; background:white; border-radius:10px;"></div>
+        <div id="comp-view-right" class="drop-zone" style="flex:1; min-width:300px; background:white; border-radius:10px;"></div>
+    </div>
+</div>
+
+<div id="panel-smart" class="panel">
+    <div class="admin-section">
+        <h3>🤖 Suggested Trades</h3>
+        <label>Strategy:</label>
+        <select id="smart-strategy" onchange="renderSmartTrades()">
+            <option value="closers">Close Sets (8/9)</option>
+            <option value="high">High Stars (4-5⭐)</option>
+            <option value="low">Low Stars (1-3⭐)</option>
+            <option value="blitz">Gold Blitz Priority</option>
+            <option value="set">Same Set Trade</option>
+        </select>
+        <div id="smart-list" style="margin-top:20px;"></div>
+    </div>
+</div>
+
+<div id="panel-rewards" class="panel">
+    <div class="admin-section" style="text-align:center;">
+        <h2>🌟 Vault Rewards</h2>
+        <div class="star-display" style="font-size:2.5rem; font-weight:bold; color:#FFD700; text-shadow:1px 1px 0 #000;">
+            <span id="vault-star-count">0</span> Stars
+        </div>
+        
+        <div style="display:flex; gap:20px; justify-content:center; margin-top:20px;">
+            <div id="vault-250" class="set-card" style="width:200px; padding:15px; cursor:pointer; opacity:0.6; transition:0.3s; border-color:#ccc;" onclick="openVault(250)">
+                <h3 style="color:var(--vault-orange)">250</h3>
+                <div style="font-size:3rem">📦</div>
+                <small>Open Vault</small>
+            </div>
+            <div id="vault-450" class="set-card" style="width:200px; padding:15px; cursor:pointer; opacity:0.6; transition:0.3s; border-color:#ccc;" onclick="openVault(450)">
+                <h3 style="color:var(--vault-blue)">450</h3>
+                <div style="font-size:3rem">📘</div>
+                <small>Open Vault</small>
+            </div>
+            <div id="vault-700" class="set-card" style="width:200px; padding:15px; cursor:pointer; opacity:0.6; transition:0.3s; border-color:#ccc;" onclick="openVault(700)">
+                <h3 style="color:var(--vault-yellow)">700</h3>
+                <div style="font-size:3rem">👑</div>
+                <small>Open Vault</small>
+            </div>
+        </div>
+        <hr>
+        <h3>🏆 Album Completion</h3>
+        <p>Est. Reward: <span id="album-reward-display">15,000 Dice + Cash + Token</span></p>
+        <button class="btn btn-green" onclick="completeAlbum()">🎉 Complete Album & Start Prestige</button>
+        <button class="btn" onclick="undoCompletion()" id="undo-btn" style="display:none; margin-top:10px;">↩️ Oops! Undo Completion</button>
+    </div>
+</div>
+
+<div id="panel-showcase" class="panel">
+    <div class="admin-section">
+        <h3>📸 Sticker Showcase</h3>
+        <p>Create a shareable image of what you have and what you need.</p>
+        <div style="display:flex; gap:10px; margin-bottom:10px;">
+            <button class="btn btn-green" onclick="generateShowcase('auto')">Auto-Fill (Best)</button>
+            <button class="btn" onclick="generateShowcase('manual')">Clear / Manual</button>
+            <button class="btn" onclick="toggleScreenshotMode()">📷 Screenshot Mode</button>
+        </div>
+    </div>
+    <div id="showcase-card" class="showcase-container">
+        <div style="border-bottom:4px solid #333; padding-bottom:10px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <h2 style="margin:0; color:var(--brand-red);">POSH PETS</h2>
+                <div id="showcase-user-details"></div>
+            </div>
+            <div style="text-align:right;">
+                <h3 style="margin:0;">TRADING CARD</h3>
+                <small id="showcase-date"></small>
+            </div>
+        </div>
+        <div style="display:flex; gap:20px;">
+            <div style="flex:1; background:#f4f4f4; padding:10px; border-radius:10px;">
+                <h3 style="text-align:center; border-bottom:2px solid #ccc; padding-bottom:5px;">📤 I HAVE (Duplicates)</h3>
+                <div id="showcase-haves"></div>
+            </div>
+            <div style="flex:1; background:#f4f4f4; padding:10px; border-radius:10px;">
+                <h3 style="text-align:center; border-bottom:2px solid #ccc; padding-bottom:5px;">📥 I NEED</h3>
+                <div id="showcase-needs"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="panel-import" class="panel">
+    <div class="admin-section">
+        <h3>📥 Import Stickers</h3>
+        <p><strong>Option 1: Paste CSV Text</strong> (Sticker Name, Quantity OR List of Numbers)</p>
+        <textarea id="csv-text-input" placeholder="Kiara, 2&#10;Roo, 0..." style="height:150px; width:100%;"></textarea>
+        <button class="btn btn-blue" onclick="processCSVText()">Import Text</button>
+        <br><br>
+        <p><strong>Option 2: Upload CSV File</strong></p>
+        <input type="file" id="csv-upload" onchange="handleCSVUpload(event)" accept=".csv">
+        <br><br>
+        <div style="background:#fff3cd; padding:15px; border:1px solid #ffeeba; border-radius:10px;">
+            <strong>💡 AI Screenshot Helper</strong><br>
+            <button class="btn" onclick="showModal('ai-prompt-modal')" style="margin-top:5px;">Get AI Prompt</button>
+        </div>
+    </div>
+</div>
+
+<div id="panel-admin" class="panel">
+    <div class="admin-section">
+        <h3>👥 Account Management</h3>
+        <div id="account-list-admin" style="margin-bottom:20px;"></div>
+        <button class="btn btn-green" onclick="openAddAccountModal()">+ Add New Account</button>
+        
+        <hr>
+        <h3>⚡ Scheduled Events</h3>
+        <label>Gold Blitz (Active? <input type="checkbox" id="blitz-toggle" onchange="saveGlobalSettings()">)</label>
+        <div style="display:flex; gap:10px; margin-top:5px;">
+            <input type="number" id="blitz-card-1" placeholder="Card ID 1 (e.g. 2009)" onchange="saveGlobalSettings()">
+            <input type="number" id="blitz-card-2" placeholder="Card ID 2 (e.g. 2109)" onchange="saveGlobalSettings()">
+        </div>
+        <label>Schedule Blitz Start:</label>
+        <input type="datetime-local" id="blitz-schedule" onchange="saveGlobalSettings()">
+        
+        <br><br>
+        <label>Trade Fest (10 Sends) (Active? <input type="checkbox" id="fest-toggle" onchange="saveGlobalSettings()">)</label>
+        <br>
+        <label>Schedule Fest Start:</label>
+        <input type="datetime-local" id="fest-schedule" onchange="saveGlobalSettings()">
+
+        <hr>
+        <h3>💾 Global Data</h3>
+        <button class="btn" onclick="exportData()">Backup Full JSON</button>
+        <button class="btn" onclick="document.getElementById('json-upload').click()">Restore Full JSON</button>
+        <input type="file" id="json-upload" style="display:none" onchange="importData(event)">
+    </div>
+</div>
+
+<div id="ai-prompt-modal" class="modal">
+    <div class="modal-box">
+        <h3>🤖 AI Vision Prompt</h3>
+        <p>Copy this text and paste it into ChatGPT or Gemini with your screenshots:</p>
+        <div class="prompt-text">
+Analyze these Monopoly Go screenshots. Extract sticker quantities into a CSV table.
+Look for these visual cues:
+1. QUANTITY: 
+   - "+1" badge means I have 2 total (1 owned + 1 dup).
+   - "+2" badge means I have 3 total.
+   - No badge but full color image = I have 1.
+2. MISSING: 
+   - Grayed out image with text in center (e.g. 'Golden Blitz') = 0.
+   - No image (silhouette/text only) = 0.
+3. ORDER: Top row (L-R), Middle (L-R), Bottom (L-R).
+
+Output a simple table: 
+Sticker Name, Quantity
+(IMPORTANT: Include rows for quantity 0 if sticker is missing. Do not omit missing stickers. I need the full list).
+        </div>
+        <button class="btn" onclick="closeModal('ai-prompt-modal')">Close</button>
+    </div>
+</div>
+
+<div id="new-plan-modal" class="modal">
+    <div class="modal-box">
+        <h3>Start New Trade Plan</h3>
+        <label>Sender:</label><select id="plan-sender"></select>
+        <label>Receiver:</label><select id="plan-receiver"></select>
+        <button class="btn btn-green" onclick="createPlan()">Create Plan</button>
+        <button class="btn" onclick="closeModal('new-plan-modal')">Cancel</button>
+    </div>
+</div>
+
+<div id="sticker-picker-modal" class="modal">
+    <div class="modal-box">
+        <h3>Add Sticker</h3>
+        <input type="text" id="sticker-search" placeholder="Search..." onkeyup="filterStickerPicker()">
+        <div id="sticker-picker-list" style="max-height:300px; overflow-y:scroll; margin-top:10px;"></div>
+        <button class="btn" onclick="closeModal('sticker-picker-modal')" style="margin-top:10px;">Cancel</button>
+    </div>
+</div>
+
+<div id="add-account-modal" class="modal">
+    <div class="modal-box">
+        <h3>Add/Edit Account</h3>
+        <input type="hidden" id="edit-acc-id">
+        <input type="text" id="edit-acc-name" placeholder="Name">
+        <input type="text" id="edit-acc-code" placeholder="MoGo Code">
+        <input type="text" id="edit-acc-link" placeholder="Invite Link (https://...)">
+        <button class="btn btn-green" onclick="saveAccountDetails()">Save</button>
+        <button class="btn" onclick="closeModal('add-account-modal')">Cancel</button>
+    </div>
+</div>
+
+<div id="edit-prizes-modal" class="modal">
+    <div class="modal-box">
+        <h3>⚙️ Customize Rewards</h3>
+        <label>Album Completion Dice:</label>
+        <input type="number" id="prize-album-dice">
+        <label>Album Completion Cash:</label>
+        <input type="text" id="prize-album-cash" placeholder="$...">
+        <label>Total Set Dice (Estimate):</label>
+        <input type="number" id="prize-sets-total">
+        <button class="btn btn-green" onclick="savePrizes()">Save Config</button>
+        <button class="btn" onclick="closeModal('edit-prizes-modal')">Cancel</button>
+    </div>
+</div>
+
+<script>
+    // --- 1. FULL POSH PETS DATABASE (Sets 1-25) ---
+    // Derived from your CSV upload
+    const RAW_DB = [
+        [1, "Community Gallery", "Kiara", 1, "N"], [1, "Community Gallery", "Roo", 1, "N"], [1, "Community Gallery", "Smokey", 1, "N"], [1, "Community Gallery", "Bryan", 1, "N"], [1, "Community Gallery", "Stella", 1, "N"], [1, "Community Gallery", "Posh Paws", 1, "N"], [1, "Community Gallery", "Furry Friend", 1, "N"], [1, "Community Gallery", "Park Play", 1, "N"], [1, "Community Gallery", "Gallery Gift", 1, "N"],
+        [2, "Pet Pampering", "Bubble Bath", 1, "N"], [2, "Pet Pampering", "Fluffy Towel", 1, "N"], [2, "Pet Pampering", "Grooming Kit", 1, "N"], [2, "Pet Pampering", "Scrub-a-dub", 1, "N"], [2, "Pet Pampering", "Shiny Coat", 1, "N"], [2, "Pet Pampering", "Squeaky Toy", 1, "N"], [2, "Pet Pampering", "Paw-some Day", 1, "N"], [2, "Pet Pampering", "Bow Tie", 2, "N"], [2, "Pet Pampering", "Best in Show", 2, "N"],
+        [3, "Backyard BBQ", "Grill Master", 1, "N"], [3, "Backyard BBQ", "Burger Flip", 1, "N"], [3, "Backyard BBQ", "Hot Dog", 1, "N"], [3, "Backyard BBQ", "Picnic Blanket", 1, "N"], [3, "Backyard BBQ", "Ketchup Bottle", 1, "N"], [3, "Backyard BBQ", "Mustard Dab", 1, "N"], [3, "Backyard BBQ", "Corn Cob", 2, "N"], [3, "Backyard BBQ", "Charcoal Bag", 2, "N"], [3, "Backyard BBQ", "Spatula Spin", 2, "N"],
+        [4, "Morning Walk", "Sun Rise", 1, "N"], [4, "Morning Walk", "Coffee Cup", 1, "N"], [4, "Morning Walk", "Early Bird", 1, "N"], [4, "Morning Walk", "Dew Drop", 2, "N"], [4, "Morning Walk", "Fresh Air", 2, "N"], [4, "Morning Walk", "Park Path", 2, "N"], [4, "Morning Walk", "Leash Link", 2, "N"], [4, "Morning Walk", "Hydrant Hug", 2, "N"], [4, "Morning Walk", "Daily Jog", 3, "N"],
+        [5, "Kitty Nap", "Soft Pillow", 1, "N"], [5, "Kitty Nap", "Warm Sunbeam", 1, "N"], [5, "Kitty Nap", "Dreamy Eyes", 2, "N"], [5, "Kitty Nap", "Tail Twitch", 2, "N"], [5, "Kitty Nap", "Purr-fect Sleep", 2, "N"], [5, "Kitty Nap", "Catnip Toy", 2, "N"], [5, "Kitty Nap", "Yarn Ball", 3, "N"], [5, "Kitty Nap", "Midnight Snack", 3, "N"], [5, "Kitty Nap", "Snuggle Session", 3, "N"],
+        [6, "Doggy Daycare", "Play Pen", 2, "N"], [6, "Doggy Daycare", "Puppy Eyes", 2, "N"], [6, "Doggy Daycare", "Nap Time", 2, "N"], [6, "Doggy Daycare", "Feeding Bowl", 2, "N"], [6, "Doggy Daycare", "Chew Bone", 2, "N"], [6, "Doggy Daycare", "Bark Park", 3, "N"], [6, "Doggy Daycare", "Furry Friends", 3, "N"], [6, "Doggy Daycare", "Golden Retriever", 3, "Y"], [6, "Doggy Daycare", "Daycare Diploma", 3, "Y"],
+        [7, "Aquatic Pals", "Fish Bowl", 2, "N"], [7, "Aquatic Pals", "Bubbles", 2, "N"], [7, "Aquatic Pals", "Coral Reef", 2, "N"], [7, "Aquatic Pals", "Sea Shell", 3, "N"], [7, "Aquatic Pals", "Blue Whale", 3, "N"], [7, "Aquatic Pals", "Dolphin Dash", 3, "N"], [7, "Aquatic Pals", "Starfish", 3, "N"], [7, "Aquatic Pals", "Deep Sea", 4, "N"], [7, "Aquatic Pals", "Pearl Finder", 4, "Y"],
+        [8, "Jungle Jaunt", "Vines", 2, "N"], [8, "Jungle Jaunt", "Tropical Leaf", 2, "N"], [8, "Jungle Jaunt", "Monkey Mischief", 3, "N"], [8, "Jungle Jaunt", "Tiger Stripe", 3, "N"], [8, "Jungle Jaunt", "Parrots Perch", 3, "N"], [8, "Jungle Jaunt", "Hidden Path", 3, "N"], [8, "Jungle Jaunt", "Rain Forest", 4, "N"], [8, "Jungle Jaunt", "Lion King", 4, "N"], [8, "Jungle Jaunt", "Golden Gorilla", 4, "Y"],
+        [9, "Farm Fun", "Red Barn", 2, "N"], [9, "Farm Fun", "Tractor Pull", 3, "N"], [9, "Farm Fun", "Hay Bale", 3, "N"], [9, "Farm Fun", "Farm Fresh", 3, "N"], [9, "Farm Fun", "Cow Bell", 3, "N"], [9, "Farm Fun", "Chicken Coop", 4, "N"], [9, "Farm Fun", "Piggy Bank", 4, "N"], [9, "Farm Fun", "Harvest Moon", 4, "Y"], [9, "Farm Fun", "Golden Egg", 4, "Y"],
+        [10, "Desert Drive", "Sand Dune", 3, "N"], [10, "Desert Drive", "Oasis", 3, "N"], [10, "Desert Drive", "Cactus Bloom", 3, "N"], [10, "Desert Drive", "Scorpion", 3, "N"], [10, "Desert Drive", "Camel Caravan", 4, "N"], [10, "Desert Drive", "Mirage", 4, "N"], [10, "Desert Drive", "Pyramid", 4, "N"], [10, "Desert Drive", "Sphinx", 5, "N"], [10, "Desert Drive", "Sand Storm", 5, "Y"],
+        [11, "Arctic Adventure", "Snow Flake", 3, "N"], [11, "Arctic Adventure", "Ice Berg", 3, "N"], [11, "Arctic Adventure", "Polar Bear", 4, "N"], [11, "Arctic Adventure", "Penguin Slide", 4, "N"], [11, "Arctic Adventure", "Igloo Home", 4, "N"], [11, "Arctic Adventure", "Frozen Lake", 4, "N"], [11, "Arctic Adventure", "Aurora Lights", 5, "N"], [11, "Arctic Adventure", "Arctic Fox", 5, "Y"], [11, "Arctic Adventure", "Glacial Gold", 5, "Y"],
+        [12, "Mountain Peak", "Summit", 3, "N"], [12, "Mountain Peak", "Pine Tree", 3, "N"], [12, "Mountain Peak", "Eagle Eye", 4, "N"], [12, "Mountain Peak", "Rocky Trail", 4, "N"], [12, "Mountain Peak", "Hiking Boots", 4, "N"], [12, "Mountain Peak", "Campfire", 4, "N"], [12, "Mountain Peak", "High Altitude", 5, "N"], [12, "Mountain Peak", "Goat Climb", 5, "Y"], [12, "Mountain Peak", "Peak Perfection", 5, "Y"],
+        [13, "Mach Paws", "Zoomie Mobile", 4, "N"], [13, "Mach Paws", "Pit Stop", 4, "N"], [13, "Mach Paws", "Speedy Scottie", 4, "N"], [13, "Mach Paws", "Fast Lane", 4, "N"], [13, "Mach Paws", "Turbo Tail", 4, "N"], [13, "Mach Paws", "Finish Line", 4, "N"], [13, "Mach Paws", "Engine Purr", 4, "N"], [13, "Mach Paws", "Checkered Flag", 4, "Y"], [13, "Mach Paws", "Race Day", 4, "Y"],
+        [14, "Space Explorers", "Moon Walk", 4, "N"], [14, "Space Explorers", "Star Gazer", 4, "N"], [14, "Space Explorers", "Rocket Ship", 4, "N"], [14, "Space Explorers", "Alien Friend", 4, "N"], [14, "Space Explorers", "Planet Hop", 4, "N"], [14, "Space Explorers", "Milky Way", 5, "N"], [14, "Space Explorers", "Supernova", 5, "N"], [14, "Space Explorers", "Black Hole", 5, "Y"], [14, "Space Explorers", "Golden Galaxy", 5, "Y"],
+        [15, "Deep Sea Discovery", "Submarine", 4, "N"], [15, "Deep Sea Discovery", "Angler Fish", 4, "N"], [15, "Deep Sea Discovery", "Giant Squid", 4, "N"], [15, "Deep Sea Discovery", "Treasure Chest", 4, "N"], [15, "Deep Sea Discovery", "Sunken Ship", 5, "N"], [15, "Deep Sea Discovery", "Neptune", 5, "N"], [15, "Deep Sea Discovery", "Trident", 5, "N"], [15, "Deep Sea Discovery", "Poseidon", 5, "Y"], [15, "Deep Sea Discovery", "Ocean King", 5, "Y"],
+        [16, "Medieval Magic", "Castle Wall", 4, "N"], [16, "Medieval Magic", "Dragon Breath", 4, "N"], [16, "Medieval Magic", "Knight Armor", 4, "N"], [16, "Medieval Magic", "Magic Wand", 4, "N"], [16, "Medieval Magic", "Royal Throne", 5, "N"], [16, "Medieval Magic", "Excalibur", 5, "N"], [16, "Medieval Magic", "Merlin", 5, "N"], [16, "Medieval Magic", "Wizard Gold", 5, "Y"], [16, "Medieval Magic", "Holy Grail", 5, "Y"],
+        [17, "Future Tech", "Robot Dog", 4, "N"], [17, "Future Tech", "Laser Tag", 4, "N"], [17, "Future Tech", "Cyber Space", 4, "N"], [17, "Future Tech", "Virtual Reality", 5, "N"], [17, "Future Tech", "Hologram", 5, "N"], [17, "Future Tech", "AI Brain", 5, "N"], [17, "Future Tech", "Time Machine", 5, "N"], [17, "Future Tech", "Circuit Gold", 5, "Y"], [17, "Future Tech", "Tech Titan", 5, "Y"],
+        [18, "Garden Gala", "Rose Petal", 4, "N"], [18, "Garden Gala", "Butterfly", 4, "N"], [18, "Garden Gala", "Gazebo", 4, "N"], [18, "Garden Gala", "Fountain", 5, "N"], [18, "Garden Gala", "Stone Path", 5, "N"], [18, "Garden Gala", "Garden Gnome", 5, "N"], [18, "Garden Gala", "Secret Gate", 5, "N"], [18, "Garden Gala", "Flora Gold", 5, "Y"], [18, "Garden Gala", "Bloom Bliss", 5, "Y"],
+        [19, "Musical Mayhem", "Drum Beat", 4, "N"], [19, "Musical Mayhem", "Guitar Riff", 4, "N"], [19, "Musical Mayhem", "Piano Key", 5, "N"], [19, "Musical Mayhem", "Saxophone", 5, "N"], [19, "Musical Mayhem", "Concert Stage", 5, "N"], [19, "Musical Mayhem", "Micro Phone", 5, "N"], [19, "Musical Mayhem", "Sound Wave", 5, "N"], [19, "Musical Mayhem", "Record Gold", 5, "Y"], [19, "Musical Mayhem", "Melody Master", 5, "Y"],
+        [20, "Hello Kitty & Friends", "Hello Kitty", 5, "N"], [20, "Hello Kitty & Friends", "Cinnamoroll", 5, "N"], [20, "Hello Kitty & Friends", "My Melody", 5, "N"], [20, "Hello Kitty & Friends", "Keroppi", 5, "N"], [20, "Hello Kitty & Friends", "Badtz-Maru", 5, "N"], [20, "Hello Kitty & Friends", "Pompompurin", 5, "N"], [20, "Hello Kitty & Friends", "Picnic Friends", 5, "Y"], [20, "Hello Kitty & Friends", "Sanrio Garden", 5, "Y"], [20, "Hello Kitty & Friends", "Friendship Bow", 5, "Y"],
+        [21, "Hollywood Pets", "Movie Star", 4, "N"], [21, "Hollywood Pets", "Red Carpet", 4, "N"], [21, "Hollywood Pets", "Popcorn", 4, "N"], [21, "Hollywood Pets", "Camera Action", 5, "N"], [21, "Hollywood Pets", "Director Chair", 5, "N"], [21, "Hollywood Pets", "Award Trophy", 5, "N"], [21, "Hollywood Pets", "Walk of Fame", 5, "N"], [21, "Hollywood Pets", "Cinema Gold", 5, "Y"], [21, "Hollywood Pets", "Oscar Paw", 5, "Y"],
+        [22, "Winter Wonderland", "Ski Lift", 4, "N"], [22, "Winter Wonderland", "Snowman", 4, "N"], [22, "Winter Wonderland", "Sled Run", 5, "N"], [22, "Winter Wonderland", "Hot Cocoa", 5, "N"], [22, "Winter Wonderland", "Pine Cone", 5, "N"], [22, "Winter Wonderland", "Ice Skates", 5, "N"], [22, "Winter Wonderland", "Mittens", 5, "N"], [22, "Winter Wonderland", "Frost Gold", 5, "Y"], [22, "Winter Wonderland", "Winter King", 5, "Y"],
+        [23, "Superhero Squad", "Cape Flight", 4, "N"], [23, "Superhero Squad", "Masked Hero", 4, "N"], [23, "Superhero Squad", "Power Punch", 5, "N"], [23, "Superhero Squad", "Gadget Belt", 5, "N"], [23, "Superhero Squad", "Secret Base", 5, "N"], [23, "Superhero Squad", "Flying Ace", 5, "N"], [23, "Superhero Squad", "Mighty Mutt", 5, "N"], [23, "Superhero Squad", "Hero Gold", 5, "Y"], [23, "Superhero Squad", "Justice Paw", 5, "Y"],
+        [24, "Carnival Chaos", "Ferris Wheel", 4, "N"], [24, "Carnival Chaos", "Cotton Candy", 4, "N"], [24, "Carnival Chaos", "Roller Coaster", 5, "N"], [24, "Carnival Chaos", "Fun House", 5, "N"], [24, "Carnival Chaos", "Clown Nose", 5, "N"], [24, "Carnival Chaos", "Prize Booth", 5, "N"], [24, "Carnival Chaos", "Game Tent", 5, "N"], [24, "Carnival Chaos", "Carnival Gold", 5, "Y"], [24, "Carnival Chaos", "Midway Magic", 5, "Y"],
+        [25, "Luxury Style", "Velvet Bed", 5, "N"], [25, "Luxury Style", "Silk Scarf", 5, "N"], [25, "Luxury Style", "Crystal Bowl", 5, "N"], [25, "Luxury Style", "Designer Leash", 5, "N"], [25, "Luxury Style", "Posh Penthouse", 5, "N"], [25, "Luxury Style", "Golden Bow", 4, "Y"], [25, "Luxury Style", "Golden Tophat", 5, "Y"], [25, "Luxury Style", "Golden Skateboard", 5, "Y"], [25, "Luxury Style", "Diamond Collar", 5, "Y"]
+    ];
+
+    let ALBUM = [];
+    for(let i=1; i<=25; i++) {
+        let rows = RAW_DB.filter(r => r[0] === i);
+        if(rows.length > 0) ALBUM.push({ id: i, name: rows[0][1], prestige: i===25, stickers: rows.map((r,idx)=>({id:i*100+(idx+1), name:r[2], stars:r[3], gold:r[4]==="Y"}))});
+    }
+
+    // --- STATE ---
+    let state = JSON.parse(localStorage.getItem('mogo_final')) || {
+        accounts: [{id:1, name:"Main Tycoon", code:"", link:"", data:{}}],
+        activeAccId: 1,
+        prestigeMode: false,
+        plans: [],
+        undoSnapshot: null,
+        prizes: { albumDice: 15000, albumCash: "$$$", setTotal: 16000 },
+        settings: { 
+            blitz: { active: false, cards: [], schedule: "" },
+            fest: { active: false, schedule: "" }, 
+            endDate: "2026-04-01T15:00" 
+        }
+    };
+
+    // --- CORE ---
+    function saveState() { localStorage.setItem('mogo_final', JSON.stringify(state)); updateUI(); }
+    function getActiveAcc() { return state.accounts.find(a => a.id == state.activeAccId) || state.accounts[0]; }
+    function getAccById(id) { return state.accounts.find(a => a.id == id); }
+
+    // --- TIMER ---
+    function updateTimer() {
+        const now = new Date();
+        const end = new Date(state.settings.endDate);
+        const diff = end - now;
+        
+        if (diff <= 0) {
+            document.getElementById('countdown-timer').innerText = "SEASON ENDED";
+            return;
+        }
+
+        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        document.getElementById('countdown-timer').innerText = `⏳ Ends: ${d}d ${h}h ${m}m ${s}s`;
+        
+        // Auto-activate schedules
+        if(state.settings.blitz.schedule && new Date(state.settings.blitz.schedule) <= now && !state.settings.blitz.active) {
+            state.settings.blitz.active = true; showToast("Gold Blitz Started!", "info"); saveState();
+        }
+    }
+    setInterval(updateTimer, 1000);
+
+    function editEndDate() {
+        // Fallback if browser doesn't support datetime-local input in prompt
+        const newDate = prompt("Enter new end date (YYYY-MM-DDTHH:MM)", state.settings.endDate);
+        if(newDate) { state.settings.endDate = newDate; saveState(); showToast("Timer Updated!"); }
+    }
+
+    // --- UI UPDATES ---
+    function updateUI() {
+        const acc = getActiveAcc();
+        let linkHTML = acc.link ? `<a href="${acc.link}" target="_blank">${acc.link}</a>` : 'No Link';
+        document.getElementById('header-acc-info').innerHTML = `Code: ${acc.code || '-'} | ${linkHTML}`;
+        document.getElementById('showcase-date').innerText = new Date().toLocaleDateString();
+        
+        // Vault Bubble
+        const stars = calcStars(acc);
+        const bubble = document.getElementById('vault-bubble');
+        if(stars >= 250) { 
+            bubble.style.display="flex"; 
+            bubble.innerText = stars >= 700 ? "3" : stars >= 450 ? "2" : "1"; 
+        } else { bubble.style.display="none"; }
+
+        // Status Flags
+        document.getElementById('blitz-status').style.display = state.settings.blitz.active ? 'inline' : 'none';
+        document.getElementById('fest-status').style.display = state.settings.fest.active ? 'inline' : 'none';
+
+        // Render Panel
+        if(document.getElementById('panel-album').classList.contains('active')) renderAlbum();
+        if(document.getElementById('panel-progress').classList.contains('active')) renderProgress();
+        if(document.getElementById('panel-plan').classList.contains('active')) renderPlans();
+        if(document.getElementById('panel-rewards').classList.contains('active')) renderVaultUI(stars);
+        if(document.getElementById('panel-smart').classList.contains('active')) renderSmartTrades();
+        if(document.getElementById('panel-compare').classList.contains('active')) renderCompare();
+        if(document.getElementById('panel-showcase').classList.contains('active')) renderShowcase('auto'); // Default
+        if(document.getElementById('panel-admin').classList.contains('active')) renderAdmin();
+        
+        updateSelectors();
+    }
+
+    function updateSelectors() {
+        const selects = ['active-account', 'comp-left', 'comp-right', 'plan-sender', 'plan-receiver'];
+        selects.forEach(id => {
+            const el = document.getElementById(id);
+            if(!el) return;
+            const current = el.value;
+            el.innerHTML = '';
+            state.accounts.forEach(a => el.add(new Option(a.name, a.id)));
+            if(current && getAccById(current)) el.value = current;
+        });
+        document.getElementById('active-account').value = state.activeAccId;
+    }
+
+    // --- ALBUM ---
+    function renderAlbum() {
+        const acc = getActiveAcc();
+        const container = document.getElementById('album-container');
+        const filter = document.getElementById('set-filter');
+        
+        if(filter.options.length === 1) ALBUM.forEach(s => filter.add(new Option(`Set ${s.id}: ${s.name}`, s.id)));
+
+        container.innerHTML = ALBUM.map(set => {
+            if(set.prestige && !state.prestigeMode) return '';
+            if(filter.value !== 'all' && set.id != filter.value) return '';
+
+            const stickersHTML = set.stickers.map(s => {
+                const count = acc.data[s.id] || 0;
+                return `
+                <div class="sticker ${count>0?'owned':''} ${s.gold?'gold':''}" data-stars="${s.stars}" onclick="toggleSticker(${s.id}, ${set.id})">
+                    ${count>1 ? `<div class="count-badge">+${count-1}</div>` : ''}
+                    <div style="font-weight:bold; margin-bottom:2px;">${s.name}</div>
+                    <div style="font-size:10px;">${'⭐'.repeat(s.stars)}</div>
+                    ${count>0 ? `
+                        <div class="action-row">
+                            <div class="icon-btn btn-plus" onclick="editDupes(event, ${s.id})">+</div>
+                            ${count>1 ? `<div class="icon-btn btn-arrow" onclick="quickAddToPlan(event, ${s.id})">➜</div>` : ''}
+                        </div>
+                    ` : ''}
+                </div>`;
+            }).join('');
+
+            return `<div class="set-card">
+                <div class="set-header"><span>${set.name}</span><span>${set.stickers.filter(s=>(acc.data[s.id]||0)>0).length}/9</span></div>
+                <div class="sticker-grid">${stickersHTML}</div>
+            </div>`;
+        }).join('');
+    }
+
+    function toggleSticker(sid, setId) {
+        let acc = getActiveAcc();
+        acc.data[sid] = (acc.data[sid] || 0) === 0 ? 1 : 0;
+        
+        // Confetti Check
+        if(acc.data[sid] === 1) {
+            // Check if set complete
+            const set = ALBUM.find(s => s.id === setId);
+            const owned = set.stickers.filter(s => (acc.data[s.id]||0) > 0).length;
+            if(owned === 9) launchConfetti();
+        }
+        
+        saveState();
+    }
+    
+    function editDupes(e, sid) {
+        e.stopPropagation();
+        let acc = getActiveAcc();
+        let val = prompt("Enter total owned (1=Owned, 2=1 Dupe):", (acc.data[sid]||0)+1);
+        if(val!==null && !isNaN(val)) { acc.data[sid] = parseInt(val); saveState(); }
+    }
+
+    // --- PROGRESS ---
+    function renderProgress() {
+        const cont = document.getElementById('progress-container');
+        let html = "";
+        
+        state.accounts.forEach(acc => {
+            let sOwned = 0, gOwned = 0, stars = calcStars(acc);
+            let setsDone = 0;
+            let totalS = 0, totalG = 0;
+
+            ALBUM.forEach(set => {
+                let setHas = 0;
+                set.stickers.forEach(s => {
+                    totalS++;
+                    if(s.gold) totalG++;
+                    if((acc.data[s.id]||0)>0) {
+                        sOwned++; setHas++;
+                        if(s.gold) gOwned++;
+                    }
+                });
+                if(setHas === 9) setsDone++;
+            });
+
+            html += `
+            <div class="progress-section">
+                <h3>👤 ${acc.name}</h3>
+                <div class="p-label"><span>Album Completion</span><span>${Math.round(sOwned/totalS*100)}%</span></div>
+                <div class="p-bar-container"><div class="p-fill" style="width:${sOwned/totalS*100}%">${sOwned}/${totalS}</div></div>
+                
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <div>
+                        <div class="p-label"><span>Sets Finished</span><span>${setsDone}</span></div>
+                        <div class="p-bar-container"><div class="p-fill" style="width:${setsDone/25*100}%; background:var(--brand-blue)">${setsDone}</div></div>
+                        <small>Est. Dice: ${state.prizes.setTotal}</small>
+                    </div>
+                    <div>
+                        <div class="p-label"><span>Vault Stars</span><span>${stars}</span></div>
+                        <div class="p-bar-container"><div class="p-fill" style="width:${Math.min(stars/800*100, 100)}%; background:gold; color:black;">${stars}</div></div>
+                    </div>
+                </div>
+                
+                <div style="font-size:0.8rem; margin-top:5px; display:flex; gap:15px;">
+                    <span>Regular: <strong>${sOwned-gOwned}/${totalS-totalG}</strong></span>
+                    <span>Gold: <strong>${gOwned}/${totalG}</strong></span>
+                </div>
+            </div>`;
+        });
+        cont.innerHTML = html;
+    }
+
+    // --- TRADE PLANNER ---
+    let currentPlanIdx = -1;
+    let addingToSide = null;
+
+    function renderPlans() {
+        const list = document.getElementById('plans-list');
+        if(state.plans.length === 0) { list.innerHTML = "<p>No plans yet. Click '+ New Plan Group'.</p>"; return; }
+        
+        list.innerHTML = state.plans.map((p, idx) => {
+            const sender = getAccById(p.senderId);
+            const receiver = getAccById(p.receiverId);
+            if(!sender || !receiver) return '';
+
+            const senderStart = calcStars(sender);
+            let senderLost = p.senderItems.reduce((acc, s) => acc + (s.stars * (s.gold?2:1)), 0);
+            
+            return `
+            <div class="plan-card">
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <strong>Plan #${idx+1}</strong>
+                    <div>
+                        <button class="btn btn-green" onclick="finalizeTrade(${idx})">✅ Finalize</button>
+                        <button class="btn" style="background:#ddd" onclick="deletePlan(${idx})">❌ Cancel</button>
+                    </div>
+                </div>
+                <div class="plan-grid">
+                    <div class="plan-col">
+                        <h4>📤 ${sender.name} Gives</h4>
+                        ${p.senderItems.map((s, si) => renderSlot(s, idx, 'sender', si)).join('')}
+                        <div class="slot slot-empty" onclick="openStickerPicker(${idx}, 'sender')">+</div>
+                        <div style="font-size:0.8rem; margin-top:5px;">
+                            Stars After: <strong>${senderStart - senderLost}</strong> 
+                            ${senderStart>=700 && (senderStart-senderLost)<700 ? '<span style="color:red; background:#ffebeb; padding:2px;">Drops below 700!</span>' : ''}
+                        </div>
+                    </div>
+                    <div style="align-self:center; text-align:center; font-size:2rem;">➜</div>
+                    <div class="plan-col">
+                        <h4>📥 ${receiver.name} Gives</h4>
+                         ${p.receiverItems.map((s, ri) => renderSlot(s, idx, 'receiver', ri)).join('')}
+                        <div class="slot slot-empty" onclick="openStickerPicker(${idx}, 'receiver')">+</div>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function renderSlot(s, pIdx, side, sIdx) {
+        return `<div class="slot">
+            <span>${s.name} (${s.stars}⭐)</span>
+            <span style="color:red; cursor:pointer;" onclick="removeItem(${pIdx}, '${side}', ${sIdx})">x</span>
+        </div>`;
+    }
+
+    function openNewPlanModal() { showModal('new-plan-modal'); updateSelectors(); }
+    
+    function createPlan() {
+        const sId = document.getElementById('plan-sender').value;
+        const rId = document.getElementById('plan-receiver').value;
+        if(sId == rId) return showToast("Pick different accounts", "error");
+        state.plans.push({ senderId: sId, receiverId: rId, senderItems: [], receiverItems: [] });
+        closeModal('new-plan-modal');
+        saveState();
+        showToast("Plan Created!", "info");
+    }
+
+    function openStickerPicker(pIdx, side) {
+        currentPlanIdx = pIdx;
+        addingToSide = side;
+        const list = document.getElementById('sticker-picker-list');
+        let html = "";
+        ALBUM.forEach(set => {
+            set.stickers.forEach(s => {
+                html += `<div style="padding:8px; border-bottom:1px solid #eee; cursor:pointer;" onclick="addItemToPlan(${s.id})">${s.name} (Set ${set.id})</div>`;
+            });
+        });
+        list.innerHTML = html;
+        showModal('sticker-picker-modal');
+    }
+
+    function filterStickerPicker() {
+        const q = document.getElementById('sticker-search').value.toLowerCase();
+        const items = document.getElementById('sticker-picker-list').children;
+        Array.from(items).forEach(div => {
+            div.style.display = div.innerText.toLowerCase().includes(q) ? 'block' : 'none';
+        });
+    }
+
+    function addItemToPlan(sid) {
+        let sticker = null;
+        for(let set of ALBUM) { let s = set.stickers.find(x => x.id === sid); if(s) { sticker = s; break; } }
+        
+        const plan = state.plans[currentPlanIdx];
+        const sender = getAccById(addingToSide === 'sender' ? plan.senderId : plan.receiverId);
+        
+        // Verification
+        if((sender.data[sid] || 0) < 2) {
+            if(!confirm(`Warning: ${sender.name} does not have a duplicate of this. Add anyway?`)) return;
+        }
+
+        if(addingToSide === 'sender') plan.senderItems.push(sticker);
+        else plan.receiverItems.push(sticker);
+        
+        closeModal('sticker-picker-modal');
+        saveState();
+    }
+    
+    function quickAddToPlan(e, sid) {
+        e.stopPropagation();
+        const acc = getActiveAcc();
+        let plan = state.plans.find(p => p.senderId == acc.id);
+        
+        if(!plan) {
+            const otherAcc = state.accounts.find(a => a.id != acc.id);
+            if(!otherAcc) return showToast("Need 2 accounts to plan", "error");
+            plan = { senderId: acc.id, receiverId: otherAcc.id, senderItems: [], receiverItems: [] };
+            state.plans.push(plan);
+        }
+        
+        let sticker = null;
+        for(let set of ALBUM) { let s = set.stickers.find(x => x.id === sid); if(s) { sticker = s; break; } }
+        plan.senderItems.push(sticker);
+        showToast(`Added ${sticker.name} to Plan`, "info");
+        saveState();
+    }
+
+    function removeItem(pIdx, side, sIdx) {
+        if(side === 'sender') state.plans[pIdx].senderItems.splice(sIdx, 1);
+        else state.plans[pIdx].receiverItems.splice(sIdx, 1);
+        saveState();
+    }
+
+    function deletePlan(idx) {
+        if(confirm("Delete this plan?")) { state.plans.splice(idx, 1); saveState(); }
+    }
+
+    function finalizeTrade(idx) {
+        if(!confirm("Finalize trade? This updates your sticker counts.")) return;
+        const p = state.plans[idx];
+        const sAcc = getAccById(p.senderId);
+        const rAcc = getAccById(p.receiverId);
+
+        p.senderItems.forEach(s => {
+            if((sAcc.data[s.id]||0) > 0) sAcc.data[s.id]--;
+            rAcc.data[s.id] = (rAcc.data[s.id]||0) + 1;
+        });
+        p.receiverItems.forEach(s => {
+            if((rAcc.data[s.id]||0) > 0) rAcc.data[s.id]--;
+            sAcc.data[s.id] = (sAcc.data[s.id]||0) + 1;
+        });
+
+        state.plans.splice(idx, 1);
+        saveState();
+        showToast("Trade Finalized! 🎉", "info");
+    }
+
+    // --- SMART TRADES ---
+    function renderSmartTrades() {
+        const strategy = document.getElementById('smart-strategy').value;
+        const list = document.getElementById('smart-list');
+        let suggestions = [];
+
+        state.accounts.forEach(accA => {
+            state.accounts.forEach(accB => {
+                if(accA.id === accB.id) return;
+                ALBUM.forEach(set => {
+                    const ownedInSet = set.stickers.filter(s => (accB.data[s.id]||0)>0).length;
+                    set.stickers.forEach(s => {
+                        const countA = accA.data[s.id] || 0;
+                        const countB = accB.data[s.id] || 0;
+                        let isGold = s.gold;
+                        let isBlitz = state.settings.blitz.active && state.settings.blitz.cards.includes(s.id);
+                        if (isGold && !isBlitz) return;
+
+                        if(countA > 1 && countB === 0) {
+                            let score = 0;
+                            let note = "";
+                            if(strategy === 'closers' && ownedInSet === 8) { score=100; note="Completes Set!"; }
+                            else if(strategy === 'high' && s.stars >= 4) { score=s.stars; note=`High Star (${s.stars})`; }
+                            else if(strategy === 'low' && s.stars <= 3) { score=1; note=`Low Star (${s.stars})`; }
+                            else if(strategy === 'blitz' && isGold) { score=500; note="Gold Blitz"; }
+                            else if(strategy === 'set') { score=1; note="Same Set"; }
+
+                            if(score > 0) suggestions.push({ from: accA.name, to: accB.name, sticker: s, score, reason: note });
+                        }
+                    });
+                });
+            });
+        });
+        suggestions.sort((a,b) => b.score - a.score);
+        list.innerHTML = suggestions.map(t => `<div style="padding:10px; border-bottom:1px solid #eee;"><strong>${t.from}</strong> ➜ <strong>${t.to}</strong>: ${t.sticker.name} (${t.reason})</div>`).join('') || '<p>No trades found for this strategy.</p>';
+    }
+
+    // --- COMPARE (DRAG & DROP) ---
+    function renderCompare() {
+        const leftId = document.getElementById('comp-left').value;
+        const rightId = document.getElementById('comp-right').value;
+        if(leftId == rightId) return;
+
+        const accL = getAccById(leftId);
+        const accR = getAccById(rightId);
+        
+        document.getElementById('comp-view-left').innerHTML = `<h4>${accL.name}</h4>` + renderSimpleAlbum(accL, 'left');
+        document.getElementById('comp-view-right').innerHTML = `<h4>${accR.name}</h4>` + renderSimpleAlbum(accR, 'right');
+        
+        addDragListeners();
+    }
+
+    function renderSimpleAlbum(acc, side) {
+        return ALBUM.map(set => {
+            if(set.prestige && !state.prestigeMode) return '';
+            const html = set.stickers.map(s => {
+                const c = acc.data[s.id]||0;
+                return `<div class="sticker-drag" draggable="true" data-sid="${s.id}" data-side="${side}" 
+                        style="padding:5px; border-bottom:1px solid #eee; background:${c>1?'#eef7ee':'white'}; cursor:grab; display:flex; justify-content:space-between;">
+                    <span>${c>0 ? '✅' : '❌'} ${s.name}</span>
+                    <span>${c>1?`(+${c-1})`:''}</span>
+                </div>`;
+            }).join('');
+            return `<div style="border:1px solid #ccc; margin-bottom:5px; border-radius:5px;">
+                <div style="background:#eee; padding:5px; font-weight:bold;">${set.name}</div>
+                ${html}
+            </div>`;
+        }).join('');
+    }
+
+    function addDragListeners() {
+        const items = document.querySelectorAll('.sticker-drag');
+        const zones = document.querySelectorAll('.drop-zone');
+        
+        items.forEach(item => {
+            item.addEventListener('dragstart', e => {
+                e.dataTransfer.setData('sid', item.dataset.sid);
+                e.dataTransfer.setData('origin', item.dataset.side);
+            });
+        });
+
+        zones.forEach(zone => {
+            zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+            zone.addEventListener('dragleave', e => zone.classList.remove('drag-over'));
+            zone.addEventListener('drop', e => {
+                e.preventDefault();
+                zone.classList.remove('drag-over');
+                const sid = parseInt(e.dataTransfer.getData('sid'));
+                const origin = e.dataTransfer.getData('origin');
+                const targetZone = zone.id === 'comp-view-left' ? 'left' : 'right';
+
+                if(origin !== targetZone) {
+                    const sId = document.getElementById(origin==='left' ? 'comp-left' : 'comp-right').value;
+                    const rId = document.getElementById(targetZone==='left' ? 'comp-left' : 'comp-right').value;
+                    
+                    let plan = state.plans.find(p => p.senderId == sId && p.receiverId == rId);
+                    if(!plan) {
+                        plan = { senderId: sId, receiverId: rId, senderItems: [], receiverItems: [] };
+                        state.plans.push(plan);
+                    }
+                    
+                    let sticker = null;
+                    for(let set of ALBUM) { let s = set.stickers.find(x => x.id === sid); if(s) { sticker = s; break; } }
+                    plan.senderItems.push(sticker);
+                    saveState();
+                    showToast(`Added to Plan!`, "info");
+                }
+            });
+        });
+    }
+
+    // --- SHOWCASE ---
+    function renderShowcase(mode) {
+        const acc = getActiveAcc();
+        document.getElementById('showcase-user-details').innerHTML = `
+            <h3>${acc.name}</h3>
+            <div>${acc.code || ''}</div>
+            <div style="font-size:0.8rem">${acc.link || ''}</div>
+        `;
+        
+        const hDiv = document.getElementById('showcase-haves');
+        const nDiv = document.getElementById('showcase-needs');
+        hDiv.innerHTML = ""; nDiv.innerHTML = "";
+
+        if(mode === 'auto') {
+            // Find dupes > 1
+            let dupes = [];
+            let needs = [];
+            ALBUM.forEach(set => {
+                if(set.prestige && !state.prestigeMode) return;
+                set.stickers.forEach(s => {
+                    const c = acc.data[s.id]||0;
+                    if(c > 1 && s.stars >= 4) dupes.push(s);
+                    if(c === 0 && s.stars >= 4 && !s.gold) needs.push(s);
+                });
+            });
+            
+            // Limit to top 10
+            dupes.slice(0, 15).forEach(s => hDiv.innerHTML += `<div style="padding:5px; border-bottom:1px solid #ddd;">${s.name} (${s.stars}⭐)</div>`);
+            needs.slice(0, 15).forEach(s => nDiv.innerHTML += `<div style="padding:5px; border-bottom:1px solid #ddd;">${s.name} (${s.stars}⭐)</div>`);
+        }
+    }
+
+    function toggleScreenshotMode() {
+        document.body.classList.toggle('screenshot-mode');
+        if(document.body.classList.contains('screenshot-mode')) {
+            showToast("Screenshot Mode: ON (Click to Exit)", "info");
+            document.body.addEventListener('click', toggleScreenshotMode, {once:true});
+        }
+    }
+
+    // --- VAULT ---
+    function calcStars(acc) {
+        let stars = 0;
+        ALBUM.forEach(set => {
+            set.stickers.forEach(s => {
+                const c = acc.data[s.id] || 0;
+                if(c > 1) stars += (c-1) * (s.stars * (s.gold ? 2 : 1));
+            });
+        });
+        return stars;
+    }
+
+    function renderVaultUI(stars) {
+        document.getElementById('vault-star-count').innerText = stars;
+        ['250','450','700'].forEach(t => {
+            const el = document.getElementById('vault-'+t);
+            el.className = `set-card`; // Reset
+            if(stars >= parseInt(t)) {
+                el.style.opacity = "1";
+                el.style.borderColor = "#333";
+                el.style.transform = "scale(1.05)";
+                if(t==='250') el.style.background = "#FFF3E0";
+                if(t==='450') el.style.background = "#E3F2FD";
+                if(t==='700') el.style.background = "#FFFDE7";
+            } else {
+                el.style.opacity = "0.6";
+                el.style.transform = "scale(1)";
+                el.style.background = "white";
+            }
+        });
+        document.getElementById('album-reward-display').innerText = `${state.prizes.albumDice} Dice + ${state.prizes.albumCash} + Token`;
+    }
+
+    function openVault(cost) {
+        const acc = getActiveAcc();
+        if(calcStars(acc) < cost) return showToast("Not enough stars!", "error");
+        if(!confirm(`Open ${cost} Vault? Deducts stars.`)) return;
+        
+        let toRemove = cost;
+        let dupes = [];
+        ALBUM.forEach(set => {
+            set.stickers.forEach(s => {
+                const c = acc.data[s.id] || 0;
+                if(c > 1) { for(let k=0; k<c-1; k++) dupes.push({id:s.id, val: s.stars*(s.gold?2:1)}); }
+            });
+        });
+        
+        dupes.sort((a,b) => a.val - b.val); // Remove low val first
+        for(let d of dupes) {
+            if(toRemove <= 0) break;
+            acc.data[d.id]--;
+            toRemove -= d.val;
+        }
+        saveState();
+        showToast("Vault Opened! Rewards Collected!", "info");
+        launchConfetti();
+    }
+
+    function savePrizes() {
+        state.prizes.albumDice = document.getElementById('prize-album-dice').value;
+        state.prizes.albumCash = document.getElementById('prize-album-cash').value;
+        state.prizes.setTotal = document.getElementById('prize-sets-total').value;
+        closeModal('edit-prizes-modal');
+        saveState();
+    }
+
+    function completeAlbum() {
+        if(!confirm("Complete Album? Clears stickers, keeps stars, activates Prestige.")) return;
+        state.undoSnapshot = JSON.parse(JSON.stringify(state.accounts));
+        document.getElementById('undo-btn').style.display = 'inline-block';
+        
+        const acc = getActiveAcc();
+        acc.data = {}; 
+        state.prestigeMode = true; 
+        document.getElementById('prestige-check').checked = true;
+        saveState();
+        launchConfetti();
+    }
+
+    function undoCompletion() {
+        if(!state.undoSnapshot) return;
+        state.accounts = state.undoSnapshot;
+        state.undoSnapshot = null;
+        document.getElementById('undo-btn').style.display = 'none';
+        saveState();
+    }
+
+    // --- ADMIN & IMPORT ---
+    function renderAdmin() {
+        renderAccountListAdmin();
+        document.getElementById('blitz-toggle').checked = state.settings.blitz.active;
+        document.getElementById('blitz-card-1').value = state.settings.blitz.cards[0] || '';
+        document.getElementById('blitz-card-2').value = state.settings.blitz.cards[1] || '';
+        document.getElementById('blitz-schedule').value = state.settings.blitz.schedule || '';
+        document.getElementById('fest-toggle').checked = state.settings.fest.active;
+        document.getElementById('fest-schedule').value = state.settings.fest.schedule || '';
+    }
+
+    function saveGlobalSettings() {
+        state.settings.blitz.active = document.getElementById('blitz-toggle').checked;
+        state.settings.blitz.cards = [parseInt(document.getElementById('blitz-card-1').value), parseInt(document.getElementById('blitz-card-2').value)];
+        state.settings.blitz.schedule = document.getElementById('blitz-schedule').value;
+        state.settings.fest.active = document.getElementById('fest-toggle').checked;
+        state.settings.fest.schedule = document.getElementById('fest-schedule').value;
+        saveState();
+    }
+
+    function renderAccountListAdmin() {
+        document.getElementById('account-list-admin').innerHTML = state.accounts.map(a => 
+            `<div style="display:flex; justify-content:space-between; margin-bottom:5px; padding:10px; background:#eee; border-radius:5px;">
+                <span>${a.name}</span>
+                <div>
+                    <button class="btn" style="padding:5px;" onclick="openEditAccount(${a.id})">✏️</button>
+                    <button class="btn" style="padding:5px;" onclick="exportAccount(${a.id})">⬇️</button>
+                    <button class="btn" style="color:red; padding:5px;" onclick="deleteAccount(${a.id})">🗑️</button>
+                </div>
+            </div>`
+        ).join('');
+    }
+
+    function openEditAccount(id) {
+        const acc = getAccById(id);
+        document.getElementById('edit-acc-id').value = acc.id;
+        document.getElementById('edit-acc-name').value = acc.name;
+        document.getElementById('edit-acc-code').value = acc.code;
+        document.getElementById('edit-acc-link').value = acc.link;
+        showModal('add-account-modal');
+    }
+
+    function openAddAccountModal() {
+        document.getElementById('edit-acc-id').value = '';
+        document.getElementById('edit-acc-name').value = '';
+        document.getElementById('edit-acc-code').value = '';
+        document.getElementById('edit-acc-link').value = '';
+        showModal('add-account-modal');
+    }
+
+    function saveAccountDetails() {
+        const id = document.getElementById('edit-acc-id').value;
+        const name = document.getElementById('edit-acc-name').value;
+        const code = document.getElementById('edit-acc-code').value;
+        const link = document.getElementById('edit-acc-link').value;
+        
+        if(!name) return showToast("Name required", "error");
+        
+        if(id) {
+            const acc = getAccById(id);
+            acc.name = name; acc.code = code; acc.link = link;
+        } else {
+            state.accounts.push({ id: Date.now(), name, code, link, data: {} });
+        }
+        closeModal('add-account-modal');
+        saveState();
+    }
+    
+    function deleteAccount(id) {
+        if(confirm("Delete this account permanently?")) {
+            state.accounts = state.accounts.filter(a => a.id != id);
+            if(state.accounts.length === 0) openAddAccountModal();
+            else state.activeAccId = state.accounts[0].id;
+            saveState();
+        }
+    }
+
+    // CSV Processing
+    function processCSVText() {
+        const text = document.getElementById('csv-text-input').value;
+        processCSV(text);
+    }
+    
+    function handleCSVUpload(event) {
+        const file = event.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) { processCSV(e.target.result); };
+        reader.readAsText(file);
+    }
+
+    function processCSV(text) {
+        const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l);
+        const acc = getActiveAcc();
+        let updated = 0;
+        
+        // Remove header
+        if(isNaN(parseInt(lines[0][0])) && !lines[0].includes(',')) lines.shift();
+
+        // Detect mode
+        const isSeq = lines.every(l => !isNaN(parseInt(l.split(',')[0])) && !l.includes('Kiara')); // Heuristic
+
+        if(isSeq && lines.length > 200) {
+            let stickerIdx = 0;
+            ALBUM.forEach(set => set.stickers.forEach(s => {
+                if(stickerIdx < lines.length) {
+                    const val = parseInt(lines[stickerIdx]);
+                    if(!isNaN(val)) acc.data[s.id] = val;
+                    updated++;
+                }
+                stickerIdx++;
+            }));
+        } else {
+            lines.forEach(line => {
+                const parts = line.split(/,|\|/);
+                if(parts.length >= 2) {
+                    const name = parts[0].trim().toLowerCase();
+                    const qty = parseInt(parts[1].trim());
+                    // Fuzzy match
+                    for(let set of ALBUM) {
+                        const s = set.stickers.find(x => x.name.toLowerCase() === name);
+                        if(s && !isNaN(qty)) { acc.data[s.id] = qty; updated++; break; }
+                    }
+                }
+            });
+        }
+        saveState();
+        showToast(`Imported ${updated} stickers!`, "info");
+    }
+
+    function exportAccount(id) {
+        const acc = getAccById(id);
+        const a = document.createElement('a');
+        a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(acc));
+        a.download = `mogo_account_${acc.name}.json`; a.click();
+    }
+    
+    function exportData() {
+        const a = document.createElement('a');
+        a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+        a.download = "mogo_posh_pets_backup.json"; a.click();
+    }
+    
+    function importData(e) {
+        const r = new FileReader();
+        r.onload = function(ev) { 
+            try { 
+                const data = JSON.parse(ev.target.result);
+                if(data.accounts) { state = data; } 
+                else if(data.data) { data.id = Date.now(); state.accounts.push(data); }
+                saveState(); location.reload(); 
+            } catch(err){showToast("Error reading file", "error");} 
+        };
+        r.readAsText(e.target.files[0]);
+    }
+
+    // --- VISUALS ---
+    function showToast(msg, type='info') {
+        const t = document.createElement('div');
+        t.className = `toast ${type}`;
+        t.innerText = msg;
+        document.getElementById('toast-container').appendChild(t);
+        setTimeout(() => t.remove(), 3000);
+    }
+
+    function launchConfetti() {
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        let pieces = [];
+        for(let i=0; i<100; i++) pieces.push({x:Math.random()*canvas.width, y:0, color: `hsl(${Math.random()*360},100%,50%)`});
+        
+        let ani = setInterval(() => {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            pieces.forEach(p => {
+                p.y += 5; p.x += Math.sin(p.y/10);
+                ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 5, 5);
+            });
+            pieces = pieces.filter(p => p.y < canvas.height);
+            if(pieces.length === 0) clearInterval(ani);
+        }, 20);
+    }
+
+    // --- NAVIGATION ---
+    function showModal(id) { document.getElementById(id).style.display='block'; }
+    function closeModal(id) { document.getElementById(id).style.display='none'; }
+    function navTo(p) {
+        document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+        document.getElementById('panel-'+p).classList.add('active');
+        document.querySelectorAll('.nav-bar .btn').forEach(b=>b.classList.remove('active'));
+        event.target.classList.add('active');
+        updateUI();
+    }
+    function switchAccount() { state.activeAccId = document.getElementById('active-account').value; saveState(); }
+    function togglePrestige() { state.prestigeMode = document.getElementById('prestige-check').checked; saveState(); }
+    function clearCurrentAlbum() { if(confirm("Clear current album data?")) { getActiveAcc().data={}; saveState(); } }
+
+    // Init
+    document.getElementById('prize-album-dice').value = state.prizes.albumDice;
+    document.getElementById('prize-album-cash').value = state.prizes.albumCash;
+    document.getElementById('prize-sets-total').value = state.prizes.setTotal;
+    updateSelectors();
+    updateUI();
+    updateTimer();
+</script>
+</body>
+</html>
